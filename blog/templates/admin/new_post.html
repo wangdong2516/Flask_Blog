@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% from 'bootstrap/form.html' import render_form %}
+
+{% block title %}新文章{% endblock %}
+
+{% block content %}
+    <div class="page-header">
+        <h1>新文章</h1>
+    </div>
+    {# 渲染文章表单 #}
+    {{ render_form(form) }}
+{% endblock %}
+
+{% block scripts %}
+    {# 加载CKEditor资源和配置 #}
+    {{ super() }}
+    <script type="text/javascript" src="{{ url_for('static', filename='ckeditor/ckeditor.js') }}"></script>
+    {{ ckeditor.config(name='body') }}
+{% endblock %}

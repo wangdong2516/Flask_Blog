@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% from 'bootstrap/form.html' import render_form %}
+
+{% block title %}管理链接{% endblock %}
+
+{% block content %}
+    <div class="page-header">
+        <h1>链接
+            <small class="text-muted">{{ links|length }}</small>
+            <span class="float-right">
+                <a class="btn btn-primary btn-sm" href="{{ url_for('admin_bp.new_link') }}">新的链接</a>
+            </span>
+        </h1>
+    </div>
+    {% if links %}
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>序号</th>
+                <th>名称</th>
+                <th>链接</th>
+                <th>编辑</th>
+            </tr>
+            </thead>
+            {% for link in links %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ link.name }}</td>
+                    <td><a href="{{ link.url }}" target="_blank">{{ link.url }}</a></td>
+                    <td>
+                        <a class="btn btn-info btn-sm" href="{{ url_for('admin_bp.edit_link', link_id=link.id) }}">编辑</a>
+                        <form class="inline" method="post" action="{{ url_for('admin_bp.delete_link', link_id=link.id) }}">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                            <button type="submit" class="btn btn-danger btn-sm"
+                                    onclick="return confirm('确认删除？');">删除
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <div class="tip"><h5>当前无链接</h5></div>
+    {% endif %}
+{% endblock %}
