@@ -2,12 +2,15 @@
     表单类的定义
 """
 from flask_ckeditor import CKEditorField
+from flask_wtf.file import FileRequired, FileAllowed
+
 from blog.models import Category
 from flask_wtf import FlaskForm  # 导入表单类
-from wtforms import IntegerField, SubmitField, StringField, SelectField, TextAreaField, HiddenField  # 导入表单字段
+from wtforms import IntegerField, SubmitField, StringField, SelectField, TextAreaField, HiddenField, FileField  # 导入表单字段
 from wtforms import BooleanField, PasswordField, ValidationError  # 导入表单字段
 from wtforms.validators import DataRequired, URL, Length, Email, Optional, EqualTo  # 导入验证函数
 from blog.models import Admin
+
 
 class LoginForm(FlaskForm):
     """
@@ -22,7 +25,7 @@ class LoginForm(FlaskForm):
                                  EqualTo('password', message='密码输入错误，请重新输入')]
     )  # 确认密码
     remember = BooleanField('记住密码')  # 记住密码
-    submit = SubmitField('登陆')  # 提交按钮
+    submit = SubmitField('登录')  # 提交按钮
 
 
 class SettingForm(FlaskForm):
@@ -40,7 +43,7 @@ class CommentForm(FlaskForm):
     email = StringField('邮箱', validators=[DataRequired(), Email(), Length(1, 254)])  # 邮箱
     site = StringField('站点', validators=[Optional(), URL(), Length(0, 255)])
     body = TextAreaField('内容', validators=[DataRequired()])
-    submit = SubmitField()
+    submit = SubmitField('提交')
 
 
 class AdminCommentForm(CommentForm):
@@ -114,4 +117,14 @@ class LinkForm(FlaskForm):
     name = StringField('名称', validators=[DataRequired(), Length(1, 30)])
     url = StringField('链接', validators=[DataRequired(), URL(), Length(1, 255)])
     submit = SubmitField()
+
+
+class UploadForm(FlaskForm):
+    """上传头像的表单"""
+
+    image = FileField('上传(<=3M)', validators=[
+        FileRequired(),
+        FileAllowed(['jpeg', 'jpg', 'png'], '上传的文件类型必须是.jpeg 或者 .png 或者 .jpg')
+    ])
+    submit = SubmitField('上传')
 

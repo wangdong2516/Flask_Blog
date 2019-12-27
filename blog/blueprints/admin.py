@@ -34,18 +34,22 @@ from flask import current_app
 from flask import flash
 from flask import redirect
 from flask import url_for
+from flask_dropzone import random_filename
 
 from flask_login import login_required, current_user
-from blog.models import Post, Category, Comment, Link
-from blog.forms import PostForm, CategoryForm, LinkForm, SettingForm
+from blog.models import Post, Category, Comment, Link, Admin
+from blog.forms import PostForm, CategoryForm, LinkForm, SettingForm, UploadForm
 from blog.extensions import db
 from blog.utils import redirect_back, commit_data
+from blog.utils import confirm_required
+from blog.utils import resize_avatar
 from flask_ckeditor import upload_fail, upload_success
 admin_bp = Blueprint('admin_bp', __name__)  # 创建蓝图对象
 
 
 @admin_bp.route('/settings', methods=['GET', 'POST'])
 @login_required
+@confirm_required
 def settings():
     """
         博客的设置页面
@@ -95,6 +99,7 @@ def settings():
 
 @admin_bp.route('/post/manage')
 @login_required
+@confirm_required
 def manage_post():
     """
         文章管理页面
@@ -113,6 +118,7 @@ def manage_post():
 
 @admin_bp.route('/post/new', methods=['GET', 'POST'])
 @login_required
+@confirm_required
 def new_post():
     """
         添加文章页面
@@ -136,6 +142,7 @@ def new_post():
 
 @admin_bp.route('/new/category', methods=['GET', 'POST'])
 @login_required
+@confirm_required
 def new_category():
     """
         新建文章分类
@@ -162,6 +169,7 @@ def new_category():
 
 @admin_bp.route('/new/link', methods=['GET', 'POST'])
 @login_required
+@confirm_required
 def new_link():
     """
         新建链接
@@ -181,6 +189,7 @@ def new_link():
 
 @admin_bp.route('/category/manage')
 @login_required
+@confirm_required
 def manage_category():
     """
         管理分类
@@ -191,6 +200,7 @@ def manage_category():
 
 @admin_bp.route('/category/<int:category_id>/edit', methods=['GET', 'POST'])
 @login_required
+@confirm_required
 def edit_category(category_id):
     """
         编辑分类
@@ -211,6 +221,7 @@ def edit_category(category_id):
 
 @admin_bp.route('/category/<int:category_id>/delete', methods=['POST'])
 @login_required
+@confirm_required
 def delete_category(category_id):
     """
         删除分类
@@ -233,6 +244,7 @@ def delete_category(category_id):
 
 @admin_bp.route('/comment/manage')
 @login_required
+@confirm_required
 def manage_comment():
     """
         管理评论
@@ -264,6 +276,7 @@ def manage_comment():
 
 @admin_bp.route('/link/manage')
 @login_required
+@confirm_required
 def manage_link():
     """
         管理链接，这里的链接之所以能不传入模板
@@ -275,6 +288,7 @@ def manage_link():
 
 @admin_bp.route('/link/<int:link_id>/edit', methods=['GET', 'POST'])
 @login_required
+@confirm_required
 def edit_link(link_id):
     """
         编辑文章的链接
@@ -296,6 +310,7 @@ def edit_link(link_id):
 
 @admin_bp.route('/link/<int:link_id>/delete', methods=['POST'])
 @login_required
+@confirm_required
 def delete_link(link_id):
     """
         删除链接
@@ -310,6 +325,7 @@ def delete_link(link_id):
 
 @admin_bp.route('/post/<int:post_id>/edit', methods=['GET', 'POST'])
 @login_required
+@confirm_required
 def edit_post(post_id):
     """
         编辑文章
@@ -337,6 +353,7 @@ def edit_post(post_id):
 
 @admin_bp.route('/post/<int:post_id>/delete', methods=['POST'])
 @login_required
+@confirm_required
 def delete_post(post_id):
     """
         删除文章
@@ -353,6 +370,7 @@ def delete_post(post_id):
 
 @admin_bp.route('/set-comment/<int:post_id>', methods=['POST'])
 @login_required
+@confirm_required
 def set_comment(post_id):
     """
         开启/关闭文章评论
@@ -374,6 +392,7 @@ def set_comment(post_id):
 
 @admin_bp.route('/comment/<int:comment_id>/delete', methods=['POST'])
 @login_required
+@confirm_required
 def delete_comment(comment_id):
     """
         删除评论
@@ -389,6 +408,7 @@ def delete_comment(comment_id):
 
 @admin_bp.route('/comment/<int:comment_id>/approve', methods=['POST'])
 @login_required
+@confirm_required
 def approve_comment(comment_id):
     """
         审核评论
@@ -407,6 +427,7 @@ def approve_comment(comment_id):
 
 @admin_bp.route('/files/<path:filename>')
 @login_required
+@confirm_required
 def uploaded_files(filename):
     path = current_app.config['UPLOADED_PATH']
     return send_from_directory(path, filename)
@@ -414,6 +435,7 @@ def uploaded_files(filename):
 
 @admin_bp.route('/upload', methods=['POST'])
 @login_required
+@confirm_required
 def upload():
     """
         在集成富文本编辑器的时候，因为表单默认开启了CSRF保护，所以上传图片不会成功
@@ -427,3 +449,24 @@ def upload():
     file.save(os.path.join(current_app.config['UPLOADED_PATH'], file.filename))
     url = url_for('admin_bp.uploaded_files', filename=file.filename)
     return upload_success(url=url)
+
+
+@admin_bp.route('/upload/avatar', methods=['GET', 'POST'])
+@login_required
+@confirm_required
+def upload_avatar():
+    form = UploadForm()
+
+    if form.validate_on_submit():
+        image = form.image.data
+        filename = random_filename(image.filename)
+        base_with = current_app.config['AVATARS_PHOTO_SIZE']
+        new_image = resize_avatar(image, filename, base_with)  # 裁剪图片的尺寸
+        new_image_s = resize_avatar(image, filename, 80)
+        new_image_l = resize_avatar(image, filename, 110)
+        user = current_user._get_current_object()  # 获取代理的真实用户对象
+        user.avatar_s = new_image_s
+        user.avatar_m = new_image
+        user.avatar_l = new_image_l
+        commit_data('add', user)
+    return render_template('admin/upload_avatar.html', form=form)

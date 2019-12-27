@@ -7,12 +7,20 @@ try:
 except ImportError:
     from urllib.parse import urlparse, urljoin
 
+import os
+
+from functools import wraps
+from PIL import Image
 from flask import request
 from flask import redirect
+from flask import flash
+from flask import abort
 from flask import url_for, current_app
 from blog.extensions import db
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer  # 生成签名
 from itsdangerous import SignatureExpired, BadSignature
+
+from flask_login import current_user
 
 
 def is_safe_url(target):
@@ -86,3 +94,40 @@ def confirm_token(user, token, op):
     user.confirmed = True
     commit_data('add', user)
     return True
+
+
+def confirm_required(func):
+    """验证用户是否确认账户的装饰器"""
+
+    @wraps(func)
+    def confirm(*args, **kwargs):
+
+       if not current_user.confirmed:
+           """如果当前用户未确认账户"""
+           flash('当前功能只针对验证邮箱的用户开放', 'warning')
+           abort(403)
+       return func(*args, **kwargs)
+
+    return confirm
+
+
+def resize_avatar(image, filename, base_width):
+    """裁剪头像"""
+    # new_filename, ext = os.path.splitext(filename)
+    new_image = Image.open(image)  # 打开一个图片
+    width_precent = base_width / new_image.width  # 根据基本宽度确定需要缩小的百分比
+
+    # 如果大于1表示不需要裁剪
+    if width_precent >= 1:
+        return filename
+
+    height = new_image.size[1]
+    new_height = height * width_precent
+    img = new_image.resize((base_width, int(new_height)), Image.ANTIALIAS)
+    img.save(os.path.join(
+        current_app.config['AVATARS_SAVE_PATH'], filename),
+        optimize=True, quality=85
+    )  # 保存图片，并且压缩图片的大小
+    return filename
+
+

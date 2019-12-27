@@ -39,6 +39,11 @@ class BaseConfig(object):
     CKEDITOR_ENABLE_CSRF = True  # 配置富文本编辑器禁用CSRF
     UPLOADED_PATH = os.path.join(basedir, 'uploads')  # 指定上传文件的保存路径
 
+    # avatars扩展的配置
+    AVATARS_SAVE_PATH = os.path.join(UPLOADED_PATH, 'avatars')  # 配置头像的存储路径
+    AVATARS_SIZE_TUPLE = (30, 100, 200)  # 配置三种尺寸的头像大小，必须为一个三元素的元祖
+    AVATARS_PHOTO_SIZE = 100
+
 
 class DevelopmentConfig(BaseConfig):
     """开发环境配置"""

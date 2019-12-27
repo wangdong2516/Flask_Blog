@@ -30,6 +30,7 @@ from flask_mail import Mail  # 电子邮件扩展
 from flask_ckeditor import CKEditor  # 富文本编辑器扩展
 from flask_login import LoginManager  # 登陆认证扩展
 from flask_wtf import CSRFProtect  # csrf表单扩展
+from flask_avatars import Avatars
 # """
 #     CSRFProtect是flask-wtf内置的提供CSRF保护的扩展，可以实现CSRF保护，它主要提供了生成和验证CSRF令牌的函数，可以在不使用
 #     WTForms表单类的情况下实现CSRF保护
@@ -52,6 +53,7 @@ mail = Mail()
 moment = Moment()
 toolbar = DebugToolbarExtension()
 migrate = Migrate()
+avatars = Avatars()  # 头像扩展
 
 login_manager.login_view = 'auth.login'  # 用于设置未登录用户重定向的视图
 login_manager.login_message_category = 'warning'  # 设置未登录消息的类别，默认类别为message

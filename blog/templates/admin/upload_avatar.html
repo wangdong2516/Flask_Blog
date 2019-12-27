@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% from 'bootstrap/form.html' import render_form %}
+
+{% block title %}上传头像{% endblock %}
+
+{% block content %}
+    <div class="page-header">
+        <h1>上传头像</h1>
+    </div>
+    {# 渲染文章表单 #}
+    {{ render_form(form) }}
+{% endblock %}

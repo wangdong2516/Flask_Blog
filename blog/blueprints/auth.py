@@ -23,17 +23,17 @@
     为了使蓝图能够发挥作用，我们必须把蓝图注册到程序实例app上
 """
 
-from flask import Blueprint
+from flask import Blueprint, current_app
 from flask import redirect, url_for
 from flask import flash
 from flask import render_template
+from flask import send_from_directory
 
 from flask_login import current_user, login_user, logout_user, login_required
-
+from blog.celery_tasks.email.tasks import send_confirm_email, resend_confirm_email
 from blog.forms import LoginForm, RegisterForm
 from blog.models import Admin
 from blog.utils import redirect_back, commit_data, generate_confirmation_token, confirm_token
-from tasks.emails.tasks import send_confirm_email, resend_confirm_email
 from blog.settings import Operations
 
 
@@ -103,7 +103,7 @@ def register():
         admin.set_password(password)
         commit_data('add', admin)
         token = generate_confirmation_token(user=admin, op=Operations.CONFIRM)  # 生成一个签名
-        send_confirm_email(user=admin, token=token, to=email)  # 发送确认邮件
+        send_confirm_email(user=current_user, token=token)  # 发送确认邮件
         flash('电子邮件已经发送，请注意查收！', 'success')
         return redirect(url_for('.login'))
     return render_template('auth/register.html', form=form)
@@ -132,6 +132,17 @@ def reconfirm_email():
     # 重新生成签名
     token = generate_confirmation_token(current_user, op=Operations.CONFIRM)
     # 重新发送短信验证码
-    resend_confirm_email(current_user, token=token, to=current_user.email)
+    user = current_user
+    resend_confirm_email(user, token=token)
     flash('邮件发送成功，请注意查收！', 'success')
     return redirect(url_for('.login'))
+
+
+@auth_dp.route('/avatars/<path:filename>')
+def get_avatar(filename):
+    """
+        获取用户头像,将目录中的文件返回
+    :return:
+    """
+    return send_from_directory(current_app.config['AVATARS_SAVE_PATH'], filename)
+

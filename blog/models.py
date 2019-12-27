@@ -3,6 +3,8 @@
 """
 from datetime import datetime
 
+from flask_avatars import Identicon
+
 from blog.extensions import db
 
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -29,6 +31,26 @@ class Admin(db.Model, UserMixin):
     about = db.Column(db.Text, comment='关于')  # 关于
     confirmed = db.Column(db.Boolean, default=False, nullable=False, comment='是否确认')
     email = db.Column(db.String(40), comment='邮箱地址')
+    avatar_s = db.Column(db.String(64))  # 小尺寸图片
+    avatar_m = db.Column(db.String(64))  # 中尺寸图片
+    avatar_l = db.Column(db.String(64))  # 大尺寸图片
+    avatar_raw = db.Column(db.String(64))  # 图片描述
+
+    def __init__(self, **kwargs):
+        """
+            初始化生成用户的时候，设置一个默认的头像
+        """
+        super(Admin, self).__init__(**kwargs)
+        self.generate_avatar()
+
+    def generate_avatar(self):
+        """生成默认的头像"""
+        avatar = Identicon()
+        filenames = avatar.generate(text=self.username)
+        self.avatar_s = filenames[0]
+        self.avatar_m = filenames[1]
+        self.avatar_l = filenames[2]
+        db.session.commit()
 
     def set_password(self, password):
         """设置密码"""

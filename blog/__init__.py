@@ -11,11 +11,13 @@ from flask_login import current_user
 from flask_sqlalchemy import get_debug_queries
 from flask_wtf.csrf import CSRFError
 from flask import url_for
+from celery import Celery
 
 from blog.blueprints.admin import admin_bp
 from blog.blueprints.auth import auth_dp
 from blog.blueprints.blog import blog_bp
-from blog.extensions import bootstrap, db, login_manager, csrf, ckeditor, mail, moment, toolbar, migrate
+from blog.extensions import bootstrap, db, login_manager
+from blog.extensions import csrf, ckeditor, mail, moment, toolbar, migrate, avatars
 from blog.models import Admin, Post, Category, Comment, Link
 from blog.settings import config
 
@@ -234,6 +236,11 @@ def register_errors(app):
         """自定义400错误的处理"""
         return render_template('errors/400.html')
 
+    @app.errorhandler(403)
+    def error_403(e):
+        """403错误处理"""
+        return render_template('errors/403.html')
+
     @app.errorhandler(404)
     def error_404(e):
         """自定义404错误的处理"""
@@ -260,6 +267,7 @@ def register_extensions(app):
     moment.init_app(app)  # flask_moment本地化时间扩展
     toolbar.init_app(app)  # 调试工具扩展
     migrate.init_app(app, db)  # 数据库迁移扩展,必须传递db作为第二个参数
+    avatars.init_app(app)  # 头像
 
 
 def register_blueprints(app):
