@@ -98,12 +98,15 @@ def show_category(category_id):
 
 @blog_bp.route('/show_post/<int:post_id>', methods=['GET', 'POST'])
 def show_post(post_id):
-    """博客文章视图"""
+    """
+        博客文章视图
+    :param post_id: 文章id
+    :return: 模板
+    """
 
     post = Post.query.get_or_404(post_id)
     page = request.args.get('page', 1, type=int)
     per_page = current_app.config['BLUELOG_COMMENT_PER_PAGE']
-
     # 显示已经通过审核的评论
     pagination = Comment.query.with_parent(post).filter_by(reviewed=True).order_by(
         Comment.timestamp.asc()).paginate(page, per_page)

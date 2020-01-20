@@ -3,3 +3,7 @@
 **.idea
 get-pip.py
 package*
+**node_modules
+# commitizen工具
+**Makefile
+**make.bat

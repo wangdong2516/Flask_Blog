@@ -6,7 +6,7 @@ from flask_wtf.file import FileRequired, FileAllowed
 
 from blog.models import Category
 from flask_wtf import FlaskForm  # 导入表单类
-from wtforms import IntegerField, SubmitField, StringField, SelectField, TextAreaField, HiddenField, FileField  # 导入表单字段
+from wtforms import SubmitField, StringField, SelectField, TextAreaField, HiddenField, FileField  # 导入表单字段
 from wtforms import BooleanField, PasswordField, ValidationError  # 导入表单字段
 from wtforms.validators import DataRequired, URL, Length, Email, Optional, EqualTo  # 导入验证函数
 from blog.models import Admin
@@ -114,9 +114,9 @@ class CategoryForm(FlaskForm):
 
 class LinkForm(FlaskForm):
     """链接编辑表单"""
-    name = StringField('名称', validators=[DataRequired(), Length(1, 30)])
+    name = StringField('名称', validators=[DataRequired(), Length(1, 30)])  # 下拉选项
     url = StringField('链接', validators=[DataRequired(), URL(), Length(1, 255)])
-    submit = SubmitField()
+    submit = SubmitField('提交')
 
 
 class UploadForm(FlaskForm):
