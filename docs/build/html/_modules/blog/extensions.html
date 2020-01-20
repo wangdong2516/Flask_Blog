@@ -1,0 +1,183 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_cn">
+  <head>
+    <meta charset="utf-8" />
+    <title>blog.extensions &#8212; blog 0.1 文档</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <script type="text/javascript" src="../../_static/translations.js"></script>
+    <link rel="index" title="索引" href="../../genindex.html" />
+    <link rel="search" title="搜索" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>blog.extensions 源代码</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    存储扩展实例化的操作</span>
+
+<span class="sd">    flask_login扩展：</span>
+<span class="sd">        1。 使用：</span>
+<span class="sd">            安装： pip install flask-login</span>
+<span class="sd">            初始化： login_manager = LoginManager(app)</span>
+<span class="sd">        2.  要求：</span>
+<span class="sd">            要求表示用户的类中必须实现一下的方法和属性，以便判断用户的登录状态</span>
+
+<span class="sd">            is_authenticated: 如果已经通过认证，返回True，否则返回False</span>
+<span class="sd">            is_active: 如果允许用户登录，返回True，否则返回False</span>
+<span class="sd">            is_anonymous: 如果当前用户未登录，返回True，否则返回False</span>
+<span class="sd">            get_id()：以Unicode形式返回用户的唯一标示符</span>
+<span class="sd">        3。 UserMixin表示已经登录并且通过认证的用户，is_authenticated和is_active会返回True，is_anonymous返回False</span>
+<span class="sd">            get_id()默认会查找用户对象的id属性值作为id</span>
+<span class="sd">        4。 使用flask-login实现用户登录和登出是十分简单的，只需要调用login_user()和logout_user()即可</span>
+<span class="sd">            传入要登录或者是要登出的用户对象</span>
+<span class="sd">            原理：</span>
+<span class="sd">                flask-login使用flask的session对象将用户id存储在cookie中，名为user_id</span>
+<span class="sd">                通过将login_user()参数remember设置为True，会在浏览器中创建一个名为remember_token的cookie</span>
+<span class="sd">                当user_id的cookie失效之后，会重新恢复user_id的值</span>
+<span class="sd">        5。 current_user对象，是一个代理对象表示当前用户，调用的时候会返回当前的用户对应的模型类对象</span>
+<span class="sd">            使用flask_login需要实现用户加载函数，使用login_manager.user_loader装饰器实现，接受用户id作为参数，返回对应的</span>
+<span class="sd">            用户对象</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">flask_sqlalchemy</span> <span class="kn">import</span> <span class="n">SQLAlchemy</span>  <span class="c1"># 数据库扩展</span>
+<span class="kn">from</span> <span class="nn">flask_bootstrap</span> <span class="kn">import</span> <span class="n">Bootstrap</span>  <span class="c1"># Bootstrap扩展</span>
+<span class="kn">from</span> <span class="nn">flask_mail</span> <span class="kn">import</span> <span class="n">Mail</span>  <span class="c1"># 电子邮件扩展</span>
+<span class="kn">from</span> <span class="nn">flask_ckeditor</span> <span class="kn">import</span> <span class="n">CKEditor</span>  <span class="c1"># 富文本编辑器扩展</span>
+<span class="kn">from</span> <span class="nn">flask_login</span> <span class="kn">import</span> <span class="n">LoginManager</span>  <span class="c1"># 登陆认证扩展</span>
+<span class="kn">from</span> <span class="nn">flask_wtf</span> <span class="kn">import</span> <span class="n">CSRFProtect</span>  <span class="c1"># csrf表单扩展</span>
+<span class="kn">from</span> <span class="nn">flask_avatars</span> <span class="kn">import</span> <span class="n">Avatars</span>
+<span class="c1"># &quot;&quot;&quot;</span>
+<span class="c1">#     CSRFProtect是flask-wtf内置的提供CSRF保护的扩展，可以实现CSRF保护，它主要提供了生成和验证CSRF令牌的函数，可以在不使用</span>
+<span class="c1">#     WTForms表单类的情况下实现CSRF保护</span>
+<span class="c1">#</span>
+<span class="c1">#     CSRFProtect在模板中提供了csrf_token()函数，用来生成CSRF令牌，我们可以直接在表单中渲染这个隐藏字段，将字段的name设置为csrf_token</span>
+<span class="c1">#     在对应的视图函数中，可以直接执行删除操作，CSRFProtect会自动获取并且验证CSRF令牌的值</span>
+<span class="c1">#     默认情况下，当令牌验证错误或者是令牌过期的时候，返回404错误，可以使用错误处理函数app.errorhandler处理</span>
+<span class="c1"># &quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">flask_moment</span> <span class="kn">import</span> <span class="n">Moment</span>  <span class="c1"># 本地化时间扩展</span>
+<span class="kn">from</span> <span class="nn">flask_debugtoolbar</span> <span class="kn">import</span> <span class="n">DebugToolbarExtension</span>  <span class="c1"># 调试工具</span>
+<span class="kn">from</span> <span class="nn">flask_migrate</span> <span class="kn">import</span> <span class="n">Migrate</span>  <span class="c1"># 数据库迁移扩展</span>
+
+
+<span class="n">bootstrap</span> <span class="o">=</span> <span class="n">Bootstrap</span><span class="p">()</span>
+<span class="n">db</span> <span class="o">=</span> <span class="n">SQLAlchemy</span><span class="p">()</span>
+<span class="n">login_manager</span> <span class="o">=</span> <span class="n">LoginManager</span><span class="p">()</span>
+<span class="n">csrf</span> <span class="o">=</span> <span class="n">CSRFProtect</span><span class="p">()</span>  <span class="c1"># 实例化CSRF保护扩展</span>
+<span class="n">ckeditor</span> <span class="o">=</span> <span class="n">CKEditor</span><span class="p">()</span>
+<span class="n">mail</span> <span class="o">=</span> <span class="n">Mail</span><span class="p">()</span>
+<span class="n">moment</span> <span class="o">=</span> <span class="n">Moment</span><span class="p">()</span>
+<span class="n">toolbar</span> <span class="o">=</span> <span class="n">DebugToolbarExtension</span><span class="p">()</span>
+<span class="n">migrate</span> <span class="o">=</span> <span class="n">Migrate</span><span class="p">()</span>
+<span class="n">avatars</span> <span class="o">=</span> <span class="n">Avatars</span><span class="p">()</span>  <span class="c1"># 头像扩展</span>
+
+<span class="n">login_manager</span><span class="o">.</span><span class="n">login_view</span> <span class="o">=</span> <span class="s1">&#39;auth.login&#39;</span>  <span class="c1"># 用于设置未登录用户重定向的视图</span>
+<span class="n">login_manager</span><span class="o">.</span><span class="n">login_message_category</span> <span class="o">=</span> <span class="s1">&#39;warning&#39;</span>  <span class="c1"># 设置未登录消息的类别，默认类别为message</span>
+<span class="n">login_manager</span><span class="o">.</span><span class="n">login_message</span> <span class="o">=</span> <span class="s1">&#39;当前未登录，请先登录&#39;</span>  <span class="c1"># 设置提示消息的内容</span>
+
+
+<div class="viewcode-block" id="load_user"><a class="viewcode-back" href="../../blog.html#blog.extensions.load_user">[文档]</a><span class="nd">@login_manager</span><span class="o">.</span><span class="n">user_loader</span>
+<span class="k">def</span> <span class="nf">load_user</span><span class="p">(</span><span class="n">user_id</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        加载当前用户的函数(flask_login实现)</span>
+
+<span class="sd">        当在代码中调用current_user的时候，flask-login回调用用户加载函数返回对应的用户对象，</span>
+<span class="sd">        如果当前的用户已经登录，返回用户类的实例，如果用户未登录，回返回匿名用户对象</span>
+
+<span class="sd">        current_user存储在请求上下文的堆栈上，只有激活了请求上下文才可以使用</span>
+<span class="sd">        我们可以对用户对象调用is_authenticated来判断当前用户的登录状态，is_aurhenticated被传入到模板的上下文中</span>
+<span class="sd">        在模板中可以调用</span>
+<span class="sd">    :param user_id: 用户id</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">blog.models</span> <span class="kn">import</span> <span class="n">Admin</span>
+    <span class="n">user</span> <span class="o">=</span> <span class="n">Admin</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">user_id</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">user</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">blog</a></h1>
+
+
+
+
+
+
+
+
+<h3>导航</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">blog</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">模块代码</a><ul>
+  <li><a href="../blog.html">blog</a><ul>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">快速搜索</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="转向" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, wangdong.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

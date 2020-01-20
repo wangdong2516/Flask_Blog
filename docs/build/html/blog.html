@@ -1,0 +1,1213 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_cn">
+  <head>
+    <meta charset="utf-8" />
+    <title>blog package &#8212; blog 0.1 文档</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <script type="text/javascript" src="_static/translations.js"></script>
+    <link rel="index" title="索引" href="genindex.html" />
+    <link rel="search" title="搜索" href="search.html" />
+    <link rel="next" title="blog.blueprints package" href="blog.blueprints.html" />
+    <link rel="prev" title="blog" href="modules.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="blog-package">
+<h1>blog package<a class="headerlink" href="#blog-package" title="永久链接至标题">¶</a></h1>
+<div class="section" id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="永久链接至标题">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="blog.blueprints.html">blog.blueprints package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="blog.blueprints.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blog.blueprints.html#module-blog.blueprints.admin">blog.blueprints.admin module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blog.blueprints.html#module-blog.blueprints.auth">blog.blueprints.auth module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blog.blueprints.html#module-blog.blueprints.blog">blog.blueprints.blog module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blog.blueprints.html#module-blog.blueprints">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="blog.celery_tasks.html">blog.celery_tasks package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="blog.celery_tasks.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="blog.celery_tasks.email.html">blog.celery_tasks.email package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="blog.celery_tasks.email.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="blog.celery_tasks.email.html#module-blog.celery_tasks.email.tasks">blog.celery_tasks.email.tasks module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="blog.celery_tasks.email.html#module-blog.celery_tasks.email">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="blog.celery_tasks.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blog.celery_tasks.html#module-blog.celery_tasks.main">blog.celery_tasks.main module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blog.celery_tasks.html#module-blog.celery_tasks">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="blog.keys.html">blog.keys package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="blog.keys.html#module-blog.keys">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="永久链接至标题">¶</a></h2>
+</div>
+<div class="section" id="module-blog.extensions">
+<span id="blog-extensions-module"></span><h2>blog.extensions module<a class="headerlink" href="#module-blog.extensions" title="永久链接至标题">¶</a></h2>
+<p>存储扩展实例化的操作</p>
+<dl>
+<dt>flask_login扩展：</dt><dd><dl class="simple">
+<dt>1。 使用：</dt><dd><p>安装： pip install flask-login
+初始化： login_manager = LoginManager(app)</p>
+</dd>
+</dl>
+<ol class="arabic" start="2">
+<li><p>要求：
+要求表示用户的类中必须实现一下的方法和属性，以便判断用户的登录状态</p>
+<p>is_authenticated: 如果已经通过认证，返回True，否则返回False
+is_active: 如果允许用户登录，返回True，否则返回False
+is_anonymous: 如果当前用户未登录，返回True，否则返回False
+get_id()：以Unicode形式返回用户的唯一标示符</p>
+</li>
+</ol>
+<dl>
+<dt>3。 UserMixin表示已经登录并且通过认证的用户，is_authenticated和is_active会返回True，is_anonymous返回False</dt><dd><p>get_id()默认会查找用户对象的id属性值作为id</p>
+</dd>
+<dt>4。 使用flask-login实现用户登录和登出是十分简单的，只需要调用login_user()和logout_user()即可</dt><dd><p>传入要登录或者是要登出的用户对象
+原理：</p>
+<blockquote>
+<div><p>flask-login使用flask的session对象将用户id存储在cookie中，名为user_id
+通过将login_user()参数remember设置为True，会在浏览器中创建一个名为remember_token的cookie
+当user_id的cookie失效之后，会重新恢复user_id的值</p>
+</div></blockquote>
+</dd>
+<dt>5。 current_user对象，是一个代理对象表示当前用户，调用的时候会返回当前的用户对应的模型类对象</dt><dd><p>使用flask_login需要实现用户加载函数，使用login_manager.user_loader装饰器实现，接受用户id作为参数，返回对应的
+用户对象</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="function">
+<dt id="blog.extensions.load_user">
+<code class="sig-prename descclassname">blog.extensions.</code><code class="sig-name descname">load_user</code><span class="sig-paren">(</span><em class="sig-param">user_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog/extensions.html#load_user"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.extensions.load_user" title="永久链接至目标">¶</a></dt>
+<dd><blockquote>
+<div><p>加载当前用户的函数(flask_login实现)</p>
+<p>当在代码中调用current_user的时候，flask-login回调用用户加载函数返回对应的用户对象，
+如果当前的用户已经登录，返回用户类的实例，如果用户未登录，回返回匿名用户对象</p>
+<p>current_user存储在请求上下文的堆栈上，只有激活了请求上下文才可以使用
+我们可以对用户对象调用is_authenticated来判断当前用户的登录状态，is_aurhenticated被传入到模板的上下文中
+在模板中可以调用</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">参数</dt>
+<dd class="field-odd"><p><strong>user_id</strong> – 用户id</p>
+</dd>
+<dt class="field-even">返回</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-blog.fakes">
+<span id="blog-fakes-module"></span><h2>blog.fakes module<a class="headerlink" href="#module-blog.fakes" title="永久链接至标题">¶</a></h2>
+<p>存储虚拟数据生成函数，生成虚拟数据</p>
+<dl class="function">
+<dt id="blog.fakes.fake_admin">
+<code class="sig-prename descclassname">blog.fakes.</code><code class="sig-name descname">fake_admin</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog/fakes.html#fake_admin"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.fakes.fake_admin" title="永久链接至目标">¶</a></dt>
+<dd><blockquote>
+<div><p>生成管理员的虚拟数据</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">返回</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="blog.fakes.fake_categories">
+<code class="sig-prename descclassname">blog.fakes.</code><code class="sig-name descname">fake_categories</code><span class="sig-paren">(</span><em class="sig-param">count=10</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog/fakes.html#fake_categories"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.fakes.fake_categories" title="永久链接至目标">¶</a></dt>
+<dd><blockquote>
+<div><p>生成分类虚拟数据</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">参数</dt>
+<dd class="field-odd"><p><strong>count</strong> – 数量</p>
+</dd>
+<dt class="field-even">返回</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="blog.fakes.fake_comments">
+<code class="sig-prename descclassname">blog.fakes.</code><code class="sig-name descname">fake_comments</code><span class="sig-paren">(</span><em class="sig-param">count=500</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog/fakes.html#fake_comments"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.fakes.fake_comments" title="永久链接至目标">¶</a></dt>
+<dd><blockquote>
+<div><p>生成虚拟评论数据</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">参数</dt>
+<dd class="field-odd"><p><strong>count</strong> – 评论的数据，没有指定使用默认值500</p>
+</dd>
+<dt class="field-even">返回</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="blog.fakes.fake_links">
+<code class="sig-prename descclassname">blog.fakes.</code><code class="sig-name descname">fake_links</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog/fakes.html#fake_links"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.fakes.fake_links" title="永久链接至目标">¶</a></dt>
+<dd><p>生成虚拟链接数据</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="blog.fakes.fake_posts">
+<code class="sig-prename descclassname">blog.fakes.</code><code class="sig-name descname">fake_posts</code><span class="sig-paren">(</span><em class="sig-param">count=50</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog/fakes.html#fake_posts"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.fakes.fake_posts" title="永久链接至目标">¶</a></dt>
+<dd><blockquote>
+<div><p>生成文章虚拟数据</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">参数</dt>
+<dd class="field-odd"><p><strong>count</strong> – 数量，通过命令行执指定或者使用默认值50</p>
+</dd>
+<dt class="field-even">返回</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-blog.forms">
+<span id="blog-forms-module"></span><h2>blog.forms module<a class="headerlink" href="#module-blog.forms" title="永久链接至标题">¶</a></h2>
+<p>表单类的定义</p>
+<dl class="class">
+<dt id="blog.forms.AdminCommentForm">
+<em class="property">class </em><code class="sig-prename descclassname">blog.forms.</code><code class="sig-name descname">AdminCommentForm</code><span class="sig-paren">(</span><em class="sig-param">formdata=&lt;object object&gt;</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog/forms.html#AdminCommentForm"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.forms.AdminCommentForm" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<a class="reference internal" href="#blog.forms.CommentForm" title="blog.forms.CommentForm"><code class="xref py py-class docutils literal notranslate"><span class="pre">blog.forms.CommentForm</span></code></a></p>
+<p>管理员评论表单，管理员评论不需要姓名，电子邮箱等字段</p>
+<dl class="attribute">
+<dt id="blog.forms.AdminCommentForm.author">
+<code class="sig-name descname">author</code><em class="property"> = &lt;UnboundField(HiddenField, (), {})&gt;</em><a class="headerlink" href="#blog.forms.AdminCommentForm.author" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.forms.AdminCommentForm.email">
+<code class="sig-name descname">email</code><em class="property"> = &lt;UnboundField(HiddenField, (), {})&gt;</em><a class="headerlink" href="#blog.forms.AdminCommentForm.email" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.forms.AdminCommentForm.site">
+<code class="sig-name descname">site</code><em class="property"> = &lt;UnboundField(HiddenField, (), {})&gt;</em><a class="headerlink" href="#blog.forms.AdminCommentForm.site" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="blog.forms.CategoryForm">
+<em class="property">class </em><code class="sig-prename descclassname">blog.forms.</code><code class="sig-name descname">CategoryForm</code><span class="sig-paren">(</span><em class="sig-param">formdata=&lt;object object&gt;</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog/forms.html#CategoryForm"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.forms.CategoryForm" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal notranslate"><span class="pre">flask_wtf.form.FlaskForm</span></code></p>
+<p>编辑分类的表单</p>
+<dl class="attribute">
+<dt id="blog.forms.CategoryForm.name">
+<code class="sig-name descname">name</code><em class="property"> = &lt;UnboundField(StringField, ('分类名称',), {'validators': [&lt;wtforms.validators.DataRequired object&gt;, &lt;wtforms.validators.Length object&gt;]})&gt;</em><a class="headerlink" href="#blog.forms.CategoryForm.name" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.forms.CategoryForm.submit">
+<code class="sig-name descname">submit</code><em class="property"> = &lt;UnboundField(SubmitField, ('提交',), {})&gt;</em><a class="headerlink" href="#blog.forms.CategoryForm.submit" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="blog.forms.CategoryForm.validate_name">
+<code class="sig-name descname">validate_name</code><span class="sig-paren">(</span><em class="sig-param">field</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog/forms.html#CategoryForm.validate_name"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.forms.CategoryForm.validate_name" title="永久链接至目标">¶</a></dt>
+<dd><p>验证分类名称是否已经存在</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="blog.forms.CommentForm">
+<em class="property">class </em><code class="sig-prename descclassname">blog.forms.</code><code class="sig-name descname">CommentForm</code><span class="sig-paren">(</span><em class="sig-param">formdata=&lt;object object&gt;</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog/forms.html#CommentForm"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.forms.CommentForm" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal notranslate"><span class="pre">flask_wtf.form.FlaskForm</span></code></p>
+<p>评论表单</p>
+<dl class="attribute">
+<dt id="blog.forms.CommentForm.author">
+<code class="sig-name descname">author</code><em class="property"> = &lt;UnboundField(StringField, ('姓名',), {'validators': [&lt;wtforms.validators.DataRequired object&gt;, &lt;wtforms.validators.Length object&gt;]})&gt;</em><a class="headerlink" href="#blog.forms.CommentForm.author" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.forms.CommentForm.body">
+<code class="sig-name descname">body</code><em class="property"> = &lt;UnboundField(TextAreaField, ('内容',), {'validators': [&lt;wtforms.validators.DataRequired object&gt;]})&gt;</em><a class="headerlink" href="#blog.forms.CommentForm.body" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.forms.CommentForm.email">
+<code class="sig-name descname">email</code><em class="property"> = &lt;UnboundField(StringField, ('邮箱',), {'validators': [&lt;wtforms.validators.DataRequired object&gt;, &lt;wtforms.validators.Email object&gt;, &lt;wtforms.validators.Length object&gt;]})&gt;</em><a class="headerlink" href="#blog.forms.CommentForm.email" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.forms.CommentForm.site">
+<code class="sig-name descname">site</code><em class="property"> = &lt;UnboundField(StringField, ('站点',), {'validators': [&lt;wtforms.validators.Optional object&gt;, &lt;wtforms.validators.URL object&gt;, &lt;wtforms.validators.Length object&gt;]})&gt;</em><a class="headerlink" href="#blog.forms.CommentForm.site" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.forms.CommentForm.submit">
+<code class="sig-name descname">submit</code><em class="property"> = &lt;UnboundField(SubmitField, ('提交',), {})&gt;</em><a class="headerlink" href="#blog.forms.CommentForm.submit" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="blog.forms.LinkForm">
+<em class="property">class </em><code class="sig-prename descclassname">blog.forms.</code><code class="sig-name descname">LinkForm</code><span class="sig-paren">(</span><em class="sig-param">formdata=&lt;object object&gt;</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog/forms.html#LinkForm"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.forms.LinkForm" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal notranslate"><span class="pre">flask_wtf.form.FlaskForm</span></code></p>
+<p>链接编辑表单</p>
+<dl class="attribute">
+<dt id="blog.forms.LinkForm.name">
+<code class="sig-name descname">name</code><em class="property"> = &lt;UnboundField(StringField, ('名称',), {'validators': [&lt;wtforms.validators.DataRequired object&gt;, &lt;wtforms.validators.Length object&gt;]})&gt;</em><a class="headerlink" href="#blog.forms.LinkForm.name" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.forms.LinkForm.submit">
+<code class="sig-name descname">submit</code><em class="property"> = &lt;UnboundField(SubmitField, ('提交',), {})&gt;</em><a class="headerlink" href="#blog.forms.LinkForm.submit" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.forms.LinkForm.url">
+<code class="sig-name descname">url</code><em class="property"> = &lt;UnboundField(StringField, ('链接',), {'validators': [&lt;wtforms.validators.DataRequired object&gt;, &lt;wtforms.validators.URL object&gt;, &lt;wtforms.validators.Length object&gt;]})&gt;</em><a class="headerlink" href="#blog.forms.LinkForm.url" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="blog.forms.LoginForm">
+<em class="property">class </em><code class="sig-prename descclassname">blog.forms.</code><code class="sig-name descname">LoginForm</code><span class="sig-paren">(</span><em class="sig-param">formdata=&lt;object object&gt;</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog/forms.html#LoginForm"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.forms.LoginForm" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal notranslate"><span class="pre">flask_wtf.form.FlaskForm</span></code></p>
+<p>登陆表单类
+表单类属性将渲染成表单的name和id属性
+实例化表单字段传入的第一个参数将渲染为展示的字段名</p>
+<dl class="attribute">
+<dt id="blog.forms.LoginForm.password">
+<code class="sig-name descname">password</code><em class="property"> = &lt;UnboundField(PasswordField, ('密码',), {'validators': [&lt;wtforms.validators.DataRequired object&gt;, &lt;wtforms.validators.Length object&gt;]})&gt;</em><a class="headerlink" href="#blog.forms.LoginForm.password" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.forms.LoginForm.password_">
+<code class="sig-name descname">password_</code><em class="property"> = &lt;UnboundField(PasswordField, ('确认密码',), {'validators': [&lt;wtforms.validators.DataRequired object&gt;, &lt;wtforms.validators.Length object&gt;, &lt;wtforms.validators.EqualTo object&gt;]})&gt;</em><a class="headerlink" href="#blog.forms.LoginForm.password_" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.forms.LoginForm.remember">
+<code class="sig-name descname">remember</code><em class="property"> = &lt;UnboundField(BooleanField, ('记住密码',), {})&gt;</em><a class="headerlink" href="#blog.forms.LoginForm.remember" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.forms.LoginForm.submit">
+<code class="sig-name descname">submit</code><em class="property"> = &lt;UnboundField(SubmitField, ('登录',), {})&gt;</em><a class="headerlink" href="#blog.forms.LoginForm.submit" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.forms.LoginForm.username">
+<code class="sig-name descname">username</code><em class="property"> = &lt;UnboundField(StringField, ('用户名',), {'validators': [&lt;wtforms.validators.DataRequired object&gt;, &lt;wtforms.validators.Length object&gt;]})&gt;</em><a class="headerlink" href="#blog.forms.LoginForm.username" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="blog.forms.PostForm">
+<em class="property">class </em><code class="sig-prename descclassname">blog.forms.</code><code class="sig-name descname">PostForm</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog/forms.html#PostForm"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.forms.PostForm" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal notranslate"><span class="pre">flask_wtf.form.FlaskForm</span></code></p>
+<p>撰写文章的表单</p>
+<p>下拉列表字段通过SelectField类来表示一个select标签，
+下拉列表的选项通过参数choices指定，choices参数必须是一个包含两个元素的元祖列表
+列表中的元素分别包含选项值和选项标签</p>
+<p>使用coerce关键字指定数据类型，默认是字符串
+default参数设置默认的选项值</p>
+<p>在构造方法__init__方法中指定choices和在实例化的时候指定choices参数的效果是一样的</p>
+<dl class="attribute">
+<dt id="blog.forms.PostForm.body">
+<code class="sig-name descname">body</code><em class="property"> = &lt;UnboundField(CKEditorField, ('正文',), {'validators': [&lt;wtforms.validators.DataRequired object&gt;]})&gt;</em><a class="headerlink" href="#blog.forms.PostForm.body" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.forms.PostForm.category">
+<code class="sig-name descname">category</code><em class="property"> = &lt;UnboundField(SelectField, ('分类',), {'coerce': &lt;class 'int'&gt;, 'default': 1})&gt;</em><a class="headerlink" href="#blog.forms.PostForm.category" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.forms.PostForm.submit">
+<code class="sig-name descname">submit</code><em class="property"> = &lt;UnboundField(SubmitField, ('提交',), {})&gt;</em><a class="headerlink" href="#blog.forms.PostForm.submit" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.forms.PostForm.title">
+<code class="sig-name descname">title</code><em class="property"> = &lt;UnboundField(StringField, ('标题',), {'validators': [&lt;wtforms.validators.DataRequired object&gt;, &lt;wtforms.validators.Length object&gt;]})&gt;</em><a class="headerlink" href="#blog.forms.PostForm.title" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="blog.forms.RegisterForm">
+<em class="property">class </em><code class="sig-prename descclassname">blog.forms.</code><code class="sig-name descname">RegisterForm</code><span class="sig-paren">(</span><em class="sig-param">formdata=&lt;object object&gt;</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog/forms.html#RegisterForm"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.forms.RegisterForm" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal notranslate"><span class="pre">flask_wtf.form.FlaskForm</span></code></p>
+<p>注册表单</p>
+<dl class="attribute">
+<dt id="blog.forms.RegisterForm.about">
+<code class="sig-name descname">about</code><em class="property"> = &lt;UnboundField(StringField, ('关于',), {'validators': [&lt;wtforms.validators.Optional object&gt;]})&gt;</em><a class="headerlink" href="#blog.forms.RegisterForm.about" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.forms.RegisterForm.blog_sub_title">
+<code class="sig-name descname">blog_sub_title</code><em class="property"> = &lt;UnboundField(StringField, ('博客副标题',), {'validators': [&lt;wtforms.validators.DataRequired object&gt;, &lt;wtforms.validators.Length object&gt;]})&gt;</em><a class="headerlink" href="#blog.forms.RegisterForm.blog_sub_title" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.forms.RegisterForm.blog_title">
+<code class="sig-name descname">blog_title</code><em class="property"> = &lt;UnboundField(StringField, ('博客标题',), {'validators': [&lt;wtforms.validators.DataRequired object&gt;, &lt;wtforms.validators.Length object&gt;]})&gt;</em><a class="headerlink" href="#blog.forms.RegisterForm.blog_title" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.forms.RegisterForm.email">
+<code class="sig-name descname">email</code><em class="property"> = &lt;UnboundField(StringField, ('邮箱',), {'validators': [&lt;wtforms.validators.Email object&gt;, &lt;wtforms.validators.DataRequired object&gt;]})&gt;</em><a class="headerlink" href="#blog.forms.RegisterForm.email" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.forms.RegisterForm.name">
+<code class="sig-name descname">name</code><em class="property"> = &lt;UnboundField(StringField, ('姓名',), {'validators': [&lt;wtforms.validators.DataRequired object&gt;, &lt;wtforms.validators.Length object&gt;]})&gt;</em><a class="headerlink" href="#blog.forms.RegisterForm.name" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.forms.RegisterForm.password">
+<code class="sig-name descname">password</code><em class="property"> = &lt;UnboundField(PasswordField, ('密码',), {'validators': [&lt;wtforms.validators.DataRequired object&gt;, &lt;wtforms.validators.EqualTo object&gt;, &lt;wtforms.validators.Length object&gt;]})&gt;</em><a class="headerlink" href="#blog.forms.RegisterForm.password" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.forms.RegisterForm.password2">
+<code class="sig-name descname">password2</code><em class="property"> = &lt;UnboundField(PasswordField, ('确认密码',), {'validators': [&lt;wtforms.validators.DataRequired object&gt;]})&gt;</em><a class="headerlink" href="#blog.forms.RegisterForm.password2" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.forms.RegisterForm.submit">
+<code class="sig-name descname">submit</code><em class="property"> = &lt;UnboundField(SubmitField, ('提交',), {})&gt;</em><a class="headerlink" href="#blog.forms.RegisterForm.submit" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.forms.RegisterForm.username">
+<code class="sig-name descname">username</code><em class="property"> = &lt;UnboundField(StringField, ('用户名',), {'validators': [&lt;wtforms.validators.DataRequired object&gt;, &lt;wtforms.validators.Length object&gt;]})&gt;</em><a class="headerlink" href="#blog.forms.RegisterForm.username" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="blog.forms.RegisterForm.validate_username">
+<code class="sig-name descname">validate_username</code><span class="sig-paren">(</span><em class="sig-param">field</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog/forms.html#RegisterForm.validate_username"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.forms.RegisterForm.validate_username" title="永久链接至目标">¶</a></dt>
+<dd><p>验证用户名</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="blog.forms.SettingForm">
+<em class="property">class </em><code class="sig-prename descclassname">blog.forms.</code><code class="sig-name descname">SettingForm</code><span class="sig-paren">(</span><em class="sig-param">formdata=&lt;object object&gt;</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog/forms.html#SettingForm"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.forms.SettingForm" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal notranslate"><span class="pre">flask_wtf.form.FlaskForm</span></code></p>
+<dl class="attribute">
+<dt id="blog.forms.SettingForm.about">
+<code class="sig-name descname">about</code><em class="property"> = &lt;UnboundField(CKEditorField, ('关于',), {'validators': [&lt;wtforms.validators.DataRequired object&gt;]})&gt;</em><a class="headerlink" href="#blog.forms.SettingForm.about" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.forms.SettingForm.blog_sub_title">
+<code class="sig-name descname">blog_sub_title</code><em class="property"> = &lt;UnboundField(StringField, ('博客副标题',), {'validators': [&lt;wtforms.validators.DataRequired object&gt;, &lt;wtforms.validators.Length object&gt;]})&gt;</em><a class="headerlink" href="#blog.forms.SettingForm.blog_sub_title" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.forms.SettingForm.blog_title">
+<code class="sig-name descname">blog_title</code><em class="property"> = &lt;UnboundField(StringField, ('博客标题',), {'validators': [&lt;wtforms.validators.DataRequired object&gt;, &lt;wtforms.validators.Length object&gt;]})&gt;</em><a class="headerlink" href="#blog.forms.SettingForm.blog_title" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.forms.SettingForm.name">
+<code class="sig-name descname">name</code><em class="property"> = &lt;UnboundField(StringField, ('姓名',), {'validators': [&lt;wtforms.validators.DataRequired object&gt;, &lt;wtforms.validators.Length object&gt;]})&gt;</em><a class="headerlink" href="#blog.forms.SettingForm.name" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.forms.SettingForm.submit">
+<code class="sig-name descname">submit</code><em class="property"> = &lt;UnboundField(SubmitField, ('提交',), {})&gt;</em><a class="headerlink" href="#blog.forms.SettingForm.submit" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="blog.forms.UploadForm">
+<em class="property">class </em><code class="sig-prename descclassname">blog.forms.</code><code class="sig-name descname">UploadForm</code><span class="sig-paren">(</span><em class="sig-param">formdata=&lt;object object&gt;</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog/forms.html#UploadForm"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.forms.UploadForm" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal notranslate"><span class="pre">flask_wtf.form.FlaskForm</span></code></p>
+<p>上传头像的表单</p>
+<dl class="attribute">
+<dt id="blog.forms.UploadForm.image">
+<code class="sig-name descname">image</code><em class="property"> = &lt;UnboundField(FileField, ('上传(&lt;=3M)',), {'validators': [&lt;flask_wtf.file.FileRequired object&gt;, &lt;flask_wtf.file.FileAllowed object&gt;]})&gt;</em><a class="headerlink" href="#blog.forms.UploadForm.image" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.forms.UploadForm.submit">
+<code class="sig-name descname">submit</code><em class="property"> = &lt;UnboundField(SubmitField, ('上传',), {})&gt;</em><a class="headerlink" href="#blog.forms.UploadForm.submit" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-blog.models">
+<span id="blog-models-module"></span><h2>blog.models module<a class="headerlink" href="#module-blog.models" title="永久链接至标题">¶</a></h2>
+<p>定义数据库模型类</p>
+<dl class="class">
+<dt id="blog.models.Admin">
+<em class="property">class </em><code class="sig-prename descclassname">blog.models.</code><code class="sig-name descname">Admin</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog/models.html#Admin"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.models.Admin" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Model</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">flask_login.mixins.UserMixin</span></code></p>
+<p>管理员模型类</p>
+<dl class="attribute">
+<dt id="blog.models.Admin.about">
+<code class="sig-name descname">about</code><a class="headerlink" href="#blog.models.Admin.about" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.models.Admin.avatar_l">
+<code class="sig-name descname">avatar_l</code><a class="headerlink" href="#blog.models.Admin.avatar_l" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.models.Admin.avatar_m">
+<code class="sig-name descname">avatar_m</code><a class="headerlink" href="#blog.models.Admin.avatar_m" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.models.Admin.avatar_raw">
+<code class="sig-name descname">avatar_raw</code><a class="headerlink" href="#blog.models.Admin.avatar_raw" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.models.Admin.avatar_s">
+<code class="sig-name descname">avatar_s</code><a class="headerlink" href="#blog.models.Admin.avatar_s" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.models.Admin.blog_sub_title">
+<code class="sig-name descname">blog_sub_title</code><a class="headerlink" href="#blog.models.Admin.blog_sub_title" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.models.Admin.blog_title">
+<code class="sig-name descname">blog_title</code><a class="headerlink" href="#blog.models.Admin.blog_title" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.models.Admin.confirmed">
+<code class="sig-name descname">confirmed</code><a class="headerlink" href="#blog.models.Admin.confirmed" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.models.Admin.email">
+<code class="sig-name descname">email</code><a class="headerlink" href="#blog.models.Admin.email" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="blog.models.Admin.generate_avatar">
+<code class="sig-name descname">generate_avatar</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog/models.html#Admin.generate_avatar"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.models.Admin.generate_avatar" title="永久链接至目标">¶</a></dt>
+<dd><p>生成默认的头像</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="blog.models.Admin.id">
+<code class="sig-name descname">id</code><a class="headerlink" href="#blog.models.Admin.id" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.models.Admin.name">
+<code class="sig-name descname">name</code><a class="headerlink" href="#blog.models.Admin.name" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="blog.models.Admin.password">
+<em class="property">property </em><code class="sig-name descname">password</code><a class="headerlink" href="#blog.models.Admin.password" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.models.Admin.password_hash">
+<code class="sig-name descname">password_hash</code><a class="headerlink" href="#blog.models.Admin.password_hash" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="blog.models.Admin.set_password">
+<code class="sig-name descname">set_password</code><span class="sig-paren">(</span><em class="sig-param">password</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog/models.html#Admin.set_password"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.models.Admin.set_password" title="永久链接至目标">¶</a></dt>
+<dd><p>设置密码</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="blog.models.Admin.username">
+<code class="sig-name descname">username</code><a class="headerlink" href="#blog.models.Admin.username" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="blog.models.Admin.validate_password">
+<code class="sig-name descname">validate_password</code><span class="sig-paren">(</span><em class="sig-param">password</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog/models.html#Admin.validate_password"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.models.Admin.validate_password" title="永久链接至目标">¶</a></dt>
+<dd><p>校验密码</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="blog.models.Category">
+<em class="property">class </em><code class="sig-prename descclassname">blog.models.</code><code class="sig-name descname">Category</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog/models.html#Category"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.models.Category" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Model</span></code></p>
+<p>分类模型类</p>
+<dl class="method">
+<dt id="blog.models.Category.delete">
+<code class="sig-name descname">delete</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog/models.html#Category.delete"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.models.Category.delete" title="永久链接至目标">¶</a></dt>
+<dd><p>删除分类的时候，将文章的分类置为默认分类</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="blog.models.Category.id">
+<code class="sig-name descname">id</code><a class="headerlink" href="#blog.models.Category.id" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.models.Category.name">
+<code class="sig-name descname">name</code><a class="headerlink" href="#blog.models.Category.name" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.models.Category.posts">
+<code class="sig-name descname">posts</code><a class="headerlink" href="#blog.models.Category.posts" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="blog.models.Comment">
+<em class="property">class </em><code class="sig-prename descclassname">blog.models.</code><code class="sig-name descname">Comment</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog/models.html#Comment"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.models.Comment" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Model</span></code></p>
+<p>评论模型类</p>
+<dl class="attribute">
+<dt id="blog.models.Comment.author">
+<code class="sig-name descname">author</code><a class="headerlink" href="#blog.models.Comment.author" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.models.Comment.body">
+<code class="sig-name descname">body</code><a class="headerlink" href="#blog.models.Comment.body" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.models.Comment.email">
+<code class="sig-name descname">email</code><a class="headerlink" href="#blog.models.Comment.email" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.models.Comment.from_admin">
+<code class="sig-name descname">from_admin</code><a class="headerlink" href="#blog.models.Comment.from_admin" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.models.Comment.id">
+<code class="sig-name descname">id</code><a class="headerlink" href="#blog.models.Comment.id" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.models.Comment.post">
+<code class="sig-name descname">post</code><a class="headerlink" href="#blog.models.Comment.post" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.models.Comment.post_id">
+<code class="sig-name descname">post_id</code><a class="headerlink" href="#blog.models.Comment.post_id" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.models.Comment.replied">
+<code class="sig-name descname">replied</code><a class="headerlink" href="#blog.models.Comment.replied" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.models.Comment.replied_id">
+<code class="sig-name descname">replied_id</code><a class="headerlink" href="#blog.models.Comment.replied_id" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.models.Comment.replies">
+<code class="sig-name descname">replies</code><a class="headerlink" href="#blog.models.Comment.replies" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.models.Comment.reviewed">
+<code class="sig-name descname">reviewed</code><a class="headerlink" href="#blog.models.Comment.reviewed" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.models.Comment.site">
+<code class="sig-name descname">site</code><a class="headerlink" href="#blog.models.Comment.site" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.models.Comment.timestamp">
+<code class="sig-name descname">timestamp</code><a class="headerlink" href="#blog.models.Comment.timestamp" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="blog.models.Link">
+<em class="property">class </em><code class="sig-prename descclassname">blog.models.</code><code class="sig-name descname">Link</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog/models.html#Link"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.models.Link" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Model</span></code></p>
+<p>链接模型类</p>
+<dl class="attribute">
+<dt id="blog.models.Link.id">
+<code class="sig-name descname">id</code><a class="headerlink" href="#blog.models.Link.id" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.models.Link.name">
+<code class="sig-name descname">name</code><a class="headerlink" href="#blog.models.Link.name" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.models.Link.url">
+<code class="sig-name descname">url</code><a class="headerlink" href="#blog.models.Link.url" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="blog.models.Post">
+<em class="property">class </em><code class="sig-prename descclassname">blog.models.</code><code class="sig-name descname">Post</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog/models.html#Post"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.models.Post" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Model</span></code></p>
+<p>文章模型类</p>
+<dl class="attribute">
+<dt id="blog.models.Post.body">
+<code class="sig-name descname">body</code><a class="headerlink" href="#blog.models.Post.body" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.models.Post.can_comment">
+<code class="sig-name descname">can_comment</code><a class="headerlink" href="#blog.models.Post.can_comment" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.models.Post.category">
+<code class="sig-name descname">category</code><a class="headerlink" href="#blog.models.Post.category" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.models.Post.category_id">
+<code class="sig-name descname">category_id</code><a class="headerlink" href="#blog.models.Post.category_id" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.models.Post.comments">
+<code class="sig-name descname">comments</code><a class="headerlink" href="#blog.models.Post.comments" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.models.Post.id">
+<code class="sig-name descname">id</code><a class="headerlink" href="#blog.models.Post.id" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.models.Post.slug">
+<code class="sig-name descname">slug</code><a class="headerlink" href="#blog.models.Post.slug" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.models.Post.timestamp">
+<code class="sig-name descname">timestamp</code><a class="headerlink" href="#blog.models.Post.timestamp" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.models.Post.title">
+<code class="sig-name descname">title</code><a class="headerlink" href="#blog.models.Post.title" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-blog.settings">
+<span id="blog-settings-module"></span><h2>blog.settings module<a class="headerlink" href="#module-blog.settings" title="永久链接至标题">¶</a></h2>
+<p>项目的配置文件</p>
+<dl class="class">
+<dt id="blog.settings.BaseConfig">
+<em class="property">class </em><code class="sig-prename descclassname">blog.settings.</code><code class="sig-name descname">BaseConfig</code><a class="reference internal" href="_modules/blog/settings.html#BaseConfig"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.settings.BaseConfig" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>基本配置类</p>
+<dl class="attribute">
+<dt id="blog.settings.BaseConfig.AVATARS_PHOTO_SIZE">
+<code class="sig-name descname">AVATARS_PHOTO_SIZE</code><em class="property"> = 100</em><a class="headerlink" href="#blog.settings.BaseConfig.AVATARS_PHOTO_SIZE" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.settings.BaseConfig.AVATARS_SAVE_PATH">
+<code class="sig-name descname">AVATARS_SAVE_PATH</code><em class="property"> = '/Users/wangdong/Desktop/blog/uploads/avatars'</em><a class="headerlink" href="#blog.settings.BaseConfig.AVATARS_SAVE_PATH" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.settings.BaseConfig.AVATARS_SIZE_TUPLE">
+<code class="sig-name descname">AVATARS_SIZE_TUPLE</code><em class="property"> = (30, 100, 200)</em><a class="headerlink" href="#blog.settings.BaseConfig.AVATARS_SIZE_TUPLE" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.settings.BaseConfig.BLUELOG_ALLOWED_IMAGE_EXTENSIONS">
+<code class="sig-name descname">BLUELOG_ALLOWED_IMAGE_EXTENSIONS</code><em class="property"> = ['png', 'jpg', 'jpeg', 'gif']</em><a class="headerlink" href="#blog.settings.BaseConfig.BLUELOG_ALLOWED_IMAGE_EXTENSIONS" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.settings.BaseConfig.BLUELOG_COMMENT_PER_PAGE">
+<code class="sig-name descname">BLUELOG_COMMENT_PER_PAGE</code><em class="property"> = 15</em><a class="headerlink" href="#blog.settings.BaseConfig.BLUELOG_COMMENT_PER_PAGE" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.settings.BaseConfig.BLUELOG_EMAIL">
+<code class="sig-name descname">BLUELOG_EMAIL</code><em class="property"> = None</em><a class="headerlink" href="#blog.settings.BaseConfig.BLUELOG_EMAIL" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.settings.BaseConfig.BLUELOG_MANAGE_POST_PER_PAGE">
+<code class="sig-name descname">BLUELOG_MANAGE_POST_PER_PAGE</code><em class="property"> = 15</em><a class="headerlink" href="#blog.settings.BaseConfig.BLUELOG_MANAGE_POST_PER_PAGE" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.settings.BaseConfig.BLUELOG_POST_PER_PAGE">
+<code class="sig-name descname">BLUELOG_POST_PER_PAGE</code><em class="property"> = 10</em><a class="headerlink" href="#blog.settings.BaseConfig.BLUELOG_POST_PER_PAGE" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.settings.BaseConfig.BLUELOG_SLOW_QUERY_THRESHOLD">
+<code class="sig-name descname">BLUELOG_SLOW_QUERY_THRESHOLD</code><em class="property"> = 1</em><a class="headerlink" href="#blog.settings.BaseConfig.BLUELOG_SLOW_QUERY_THRESHOLD" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.settings.BaseConfig.BLUELOG_THEMES">
+<code class="sig-name descname">BLUELOG_THEMES</code><em class="property"> = {'black_swan': 'Black Swan', 'perfect_blue': 'Perfect Blue'}</em><a class="headerlink" href="#blog.settings.BaseConfig.BLUELOG_THEMES" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.settings.BaseConfig.BLUELOG_UPLOAD_PATH">
+<code class="sig-name descname">BLUELOG_UPLOAD_PATH</code><em class="property"> = '/Users/wangdong/Desktop/blog/uploads'</em><a class="headerlink" href="#blog.settings.BaseConfig.BLUELOG_UPLOAD_PATH" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.settings.BaseConfig.CKEDITOR_ENABLE_CSRF">
+<code class="sig-name descname">CKEDITOR_ENABLE_CSRF</code><em class="property"> = True</em><a class="headerlink" href="#blog.settings.BaseConfig.CKEDITOR_ENABLE_CSRF" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.settings.BaseConfig.CKEDITOR_FILE_UPLOADER">
+<code class="sig-name descname">CKEDITOR_FILE_UPLOADER</code><em class="property"> = 'admin_bp.upload'</em><a class="headerlink" href="#blog.settings.BaseConfig.CKEDITOR_FILE_UPLOADER" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.settings.BaseConfig.MAIL_DEFAULT_SENDER">
+<code class="sig-name descname">MAIL_DEFAULT_SENDER</code><em class="property"> = ('FlaskBlog Admin', 'wang10272516&#64;163.com')</em><a class="headerlink" href="#blog.settings.BaseConfig.MAIL_DEFAULT_SENDER" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.settings.BaseConfig.MAIL_PASSWORD">
+<code class="sig-name descname">MAIL_PASSWORD</code><em class="property"> = 'wang12774312291'</em><a class="headerlink" href="#blog.settings.BaseConfig.MAIL_PASSWORD" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.settings.BaseConfig.MAIL_PORT">
+<code class="sig-name descname">MAIL_PORT</code><em class="property"> = 465</em><a class="headerlink" href="#blog.settings.BaseConfig.MAIL_PORT" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.settings.BaseConfig.MAIL_SERVER">
+<code class="sig-name descname">MAIL_SERVER</code><em class="property"> = 'smtp.163.com'</em><a class="headerlink" href="#blog.settings.BaseConfig.MAIL_SERVER" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.settings.BaseConfig.MAIL_USERNAME">
+<code class="sig-name descname">MAIL_USERNAME</code><em class="property"> = 'wang10272516&#64;163.com'</em><a class="headerlink" href="#blog.settings.BaseConfig.MAIL_USERNAME" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.settings.BaseConfig.MAIL_USE_SSL">
+<code class="sig-name descname">MAIL_USE_SSL</code><em class="property"> = True</em><a class="headerlink" href="#blog.settings.BaseConfig.MAIL_USE_SSL" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.settings.BaseConfig.MAIL_USE_TLS">
+<code class="sig-name descname">MAIL_USE_TLS</code><em class="property"> = False</em><a class="headerlink" href="#blog.settings.BaseConfig.MAIL_USE_TLS" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.settings.BaseConfig.SECRET_KEY">
+<code class="sig-name descname">SECRET_KEY</code><em class="property"> = 'secret string'</em><a class="headerlink" href="#blog.settings.BaseConfig.SECRET_KEY" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.settings.BaseConfig.SQLALCHEMY_TRACK_MODIFICATIONS">
+<code class="sig-name descname">SQLALCHEMY_TRACK_MODIFICATIONS</code><em class="property"> = False</em><a class="headerlink" href="#blog.settings.BaseConfig.SQLALCHEMY_TRACK_MODIFICATIONS" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.settings.BaseConfig.UPLOADED_PATH">
+<code class="sig-name descname">UPLOADED_PATH</code><em class="property"> = '/Users/wangdong/Desktop/blog/uploads'</em><a class="headerlink" href="#blog.settings.BaseConfig.UPLOADED_PATH" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="blog.settings.DevelopmentConfig">
+<em class="property">class </em><code class="sig-prename descclassname">blog.settings.</code><code class="sig-name descname">DevelopmentConfig</code><a class="reference internal" href="_modules/blog/settings.html#DevelopmentConfig"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.settings.DevelopmentConfig" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<a class="reference internal" href="#blog.settings.BaseConfig" title="blog.settings.BaseConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">blog.settings.BaseConfig</span></code></a></p>
+<p>开发环境配置</p>
+<dl class="attribute">
+<dt id="blog.settings.DevelopmentConfig.SQLALCHEMY_DATABASE_URI">
+<code class="sig-name descname">SQLALCHEMY_DATABASE_URI</code><em class="property"> = 'mysql://root:wang1277&#64;localhost/flask'</em><a class="headerlink" href="#blog.settings.DevelopmentConfig.SQLALCHEMY_DATABASE_URI" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="blog.settings.Operations">
+<em class="property">class </em><code class="sig-prename descclassname">blog.settings.</code><code class="sig-name descname">Operations</code><a class="reference internal" href="_modules/blog/settings.html#Operations"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.settings.Operations" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="attribute">
+<dt id="blog.settings.Operations.CONFIRM">
+<code class="sig-name descname">CONFIRM</code><em class="property"> = 'confirm'</em><a class="headerlink" href="#blog.settings.Operations.CONFIRM" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="blog.settings.ProductionConfig">
+<em class="property">class </em><code class="sig-prename descclassname">blog.settings.</code><code class="sig-name descname">ProductionConfig</code><a class="reference internal" href="_modules/blog/settings.html#ProductionConfig"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.settings.ProductionConfig" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<a class="reference internal" href="#blog.settings.BaseConfig" title="blog.settings.BaseConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">blog.settings.BaseConfig</span></code></a></p>
+<p>生产环境配置</p>
+<dl class="attribute">
+<dt id="blog.settings.ProductionConfig.SQLALCHEMY_DATABASE_URI">
+<code class="sig-name descname">SQLALCHEMY_DATABASE_URI</code><em class="property"> = 'mysql://root:wang1277&#64;127.0.0.1:3307/flask'</em><a class="headerlink" href="#blog.settings.ProductionConfig.SQLALCHEMY_DATABASE_URI" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="blog.settings.TestingConfig">
+<em class="property">class </em><code class="sig-prename descclassname">blog.settings.</code><code class="sig-name descname">TestingConfig</code><a class="reference internal" href="_modules/blog/settings.html#TestingConfig"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.settings.TestingConfig" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<a class="reference internal" href="#blog.settings.BaseConfig" title="blog.settings.BaseConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">blog.settings.BaseConfig</span></code></a></p>
+<p>测试环境配置</p>
+<dl class="attribute">
+<dt id="blog.settings.TestingConfig.SQLALCHEMY_DATABASE_URI">
+<code class="sig-name descname">SQLALCHEMY_DATABASE_URI</code><em class="property"> = 'mysql://root:wang1277&#64;host/Test'</em><a class="headerlink" href="#blog.settings.TestingConfig.SQLALCHEMY_DATABASE_URI" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.settings.TestingConfig.TESTING">
+<code class="sig-name descname">TESTING</code><em class="property"> = True</em><a class="headerlink" href="#blog.settings.TestingConfig.TESTING" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="blog.settings.TestingConfig.WTF_CSRF_ENABLED">
+<code class="sig-name descname">WTF_CSRF_ENABLED</code><em class="property"> = False</em><a class="headerlink" href="#blog.settings.TestingConfig.WTF_CSRF_ENABLED" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-blog.utils">
+<span id="blog-utils-module"></span><h2>blog.utils module<a class="headerlink" href="#module-blog.utils" title="永久链接至标题">¶</a></h2>
+<p>存储各种辅助函数</p>
+<dl class="function">
+<dt id="blog.utils.commit_data">
+<code class="sig-prename descclassname">blog.utils.</code><code class="sig-name descname">commit_data</code><span class="sig-paren">(</span><em class="sig-param">do</em>, <em class="sig-param">obj</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog/utils.html#commit_data"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.utils.commit_data" title="永久链接至目标">¶</a></dt>
+<dd><blockquote>
+<div><p>提交修改到数据库</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">参数</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>do</strong> – 希望进行的操作 add 表示增加或者是更新</p></li>
+<li><p><strong>obj</strong> – 提交的数据对象</p></li>
+</ul>
+</dd>
+<dt class="field-even">返回</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="blog.utils.confirm_required">
+<code class="sig-prename descclassname">blog.utils.</code><code class="sig-name descname">confirm_required</code><span class="sig-paren">(</span><em class="sig-param">func</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog/utils.html#confirm_required"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.utils.confirm_required" title="永久链接至目标">¶</a></dt>
+<dd><p>验证用户是否确认账户的装饰器</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="blog.utils.confirm_token">
+<code class="sig-prename descclassname">blog.utils.</code><code class="sig-name descname">confirm_token</code><span class="sig-paren">(</span><em class="sig-param">user</em>, <em class="sig-param">token</em>, <em class="sig-param">op</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog/utils.html#confirm_token"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.utils.confirm_token" title="永久链接至目标">¶</a></dt>
+<dd><blockquote>
+<div><p>验证令牌的正确性和有效期</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">参数</dt>
+<dd class="field-odd"><p><strong>token</strong> – 加密之后的令牌值</p>
+</dd>
+<dt class="field-even">返回</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="blog.utils.generate_confirmation_token">
+<code class="sig-prename descclassname">blog.utils.</code><code class="sig-name descname">generate_confirmation_token</code><span class="sig-paren">(</span><em class="sig-param">user</em>, <em class="sig-param">op</em>, <em class="sig-param">expiration=3600</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog/utils.html#generate_confirmation_token"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.utils.generate_confirmation_token" title="永久链接至目标">¶</a></dt>
+<dd><p>生成加密令牌</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="blog.utils.is_safe_url">
+<code class="sig-prename descclassname">blog.utils.</code><code class="sig-name descname">is_safe_url</code><span class="sig-paren">(</span><em class="sig-param">target</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog/utils.html#is_safe_url"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.utils.is_safe_url" title="永久链接至目标">¶</a></dt>
+<dd><blockquote>
+<div><p>判断是否为安全的url</p>
+<dl class="simple">
+<dt>urlparse包的使用：</dt><dd><dl class="simple">
+<dt>1。 作用解析url，将url解析为一个六元素的元祖</dt><dd><p>scheme: 使用的协议
+netloc：主机地址
+path：请求的路径
+params：传递的参数
+query: 查询字符串
+fragment： 片段</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">返回</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="blog.utils.redirect_back">
+<code class="sig-prename descclassname">blog.utils.</code><code class="sig-name descname">redirect_back</code><span class="sig-paren">(</span><em class="sig-param">default='blog.index'</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog/utils.html#redirect_back"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.utils.redirect_back" title="永久链接至目标">¶</a></dt>
+<dd><p>重定向到上一个页面</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="blog.utils.resize_avatar">
+<code class="sig-prename descclassname">blog.utils.</code><code class="sig-name descname">resize_avatar</code><span class="sig-paren">(</span><em class="sig-param">image</em>, <em class="sig-param">filename</em>, <em class="sig-param">base_width</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog/utils.html#resize_avatar"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.utils.resize_avatar" title="永久链接至目标">¶</a></dt>
+<dd><p>裁剪头像</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-blog">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-blog" title="永久链接至标题">¶</a></h2>
+<p>初始化操作</p>
+<dl class="function">
+<dt id="blog.create_app">
+<code class="sig-prename descclassname">blog.</code><code class="sig-name descname">create_app</code><span class="sig-paren">(</span><em class="sig-param">config_name=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog.html#create_app"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.create_app" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="blog.register_blueprints">
+<code class="sig-prename descclassname">blog.</code><code class="sig-name descname">register_blueprints</code><span class="sig-paren">(</span><em class="sig-param">app</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog.html#register_blueprints"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.register_blueprints" title="永久链接至目标">¶</a></dt>
+<dd><p>注册蓝图对象的函数</p>
+<p>蓝图使用app.register_blueprint()方法进行注册，必须传入的参数是创建的蓝图对象，其他的参数是用来控制蓝图的行为
+比如使用url_prefix参数为蓝图下的所有视图url附加一个url前缀
+此时蓝图下的视图url都会增加一个/auth前缀
+使用subdomain参数可以为蓝图下的路由设置子域名</p>
+<blockquote>
+<div><p>app.register_blueprint(auth_dp, url_prefix=’/auth’, subdomain=’auth’)</p>
+</div></blockquote>
+<p>端点作为url规则和视图函数的中间媒介
+使用app.route()可以给视图函数注册一个路由，使用app.add_url_rule()方法同样也可以注册路由</p>
+<p>app.add_url_rule(rule, endpoint, view_func) 的第二个参数指定端点，第三个参数是视图函数对象
+在路由中，url规则和视图函数不是直接映射的，而是通过端点作为中间媒介
+不直接映射url和视图函数，原因是使用端点可以实现蓝图中的视图函数的命名空间</p>
+<p>一旦使用蓝图，我们就要对url_for()函数中的端点值进行修改，添加蓝图实例名来明确端点的归属
+端点也有一种简写的方式，在蓝图内部可以使用.视图函数的形式来省略蓝图的名称，但是在全局环境中，必须使用完整的名称</p>
+<p>使用蓝图可以避免端点值的重复冲突，但是路由的url规则还是会产生重复，当两个蓝图中有相同的url规则的时候，
+请求只会分配到第一个注册的蓝图对象上，我们可以通过使用url_prefix参数指定前缀的方式解决</p>
+<p>要使用蓝图独有的静态文件，需要在定义蓝图的时候，使用static_folder参数指定蓝图静态文件夹的位置
+参数值可以是绝对路径或者是相对路径，另外，因为蓝图内置的static路由和程序实例的static路由是相同的，
+我们需要使用static_url_path参数为蓝图对象指定新的静态文件路由,如果在创建蓝图对象的时候，制定了url
+前缀的话，这里static_url_path会自动变为/前缀/static</p>
+<blockquote>
+<div><p>auth_dp = Blueprint(‘auth’, __name__, static_floder=’static’, static_url_path=’auth/static’)</p>
+</div></blockquote>
+<p>在生成用来获取蓝图静态文件的url的时候，需要写出完整的端点</p>
+<p>当蓝图中包含独特的模板文件夹的时候，在实例化蓝图对象的时候，使用tempalte_folder参数指定模板文件夹的位置</p>
+<p>默认情况下，端点是视图函数名称，我们也可以使用endpoint参数改变</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="blog.register_commands">
+<code class="sig-prename descclassname">blog.</code><code class="sig-name descname">register_commands</code><span class="sig-paren">(</span><em class="sig-param">app</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog.html#register_commands"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.register_commands" title="永久链接至目标">¶</a></dt>
+<dd><p>注册自定义命令</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="blog.register_errors">
+<code class="sig-prename descclassname">blog.</code><code class="sig-name descname">register_errors</code><span class="sig-paren">(</span><em class="sig-param">app</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog.html#register_errors"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.register_errors" title="永久链接至目标">¶</a></dt>
+<dd><p>注册错误处理函数
+注意：</p>
+<blockquote>
+<div><p>1。 使用蓝图对象.errorhandler装饰器注册的错误处理函数，只能捕捉访问蓝图对象中的路由时发生的错误
+2。 使用蓝图对象的app_errorhandler装饰器可以注册一个全局的错误处理函数
+3。 404和405错误仅会被全局的错误处理函数所捕捉，如果想区分错误是否来自视图函数，可以根据request.path.startswith()来判断
+4。 app.errorhandler()接受错误状态码作为参数，表示捕捉指定的错误</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="blog.register_extensions">
+<code class="sig-prename descclassname">blog.</code><code class="sig-name descname">register_extensions</code><span class="sig-paren">(</span><em class="sig-param">app</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog.html#register_extensions"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.register_extensions" title="永久链接至目标">¶</a></dt>
+<dd><p>初始化一系列的扩展</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="blog.register_request_handlers">
+<code class="sig-prename descclassname">blog.</code><code class="sig-name descname">register_request_handlers</code><span class="sig-paren">(</span><em class="sig-param">app</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog.html#register_request_handlers"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.register_request_handlers" title="永久链接至目标">¶</a></dt>
+<dd><blockquote>
+<div><dl>
+<dt>注册请求处理函数</dt><dd><p>1。 请求钩子的作用就是进行一些额外的处理
+2。 使用蓝图对象注册的请求钩子，只会被蓝图对象的路由触发，可以在蓝图对象中注册全局的请求处理函数</p>
+<blockquote>
+<div><p>使用&#64;蓝图对象.before_app_request,after_app_request</p>
+</div></blockquote>
+<ol class="arabic simple" start="3">
+<li><p>&#64;app.before_request注册的请求钩子可以注册全局的请求处理函数</p></li>
+</ol>
+</dd>
+</dl>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">参数</dt>
+<dd class="field-odd"><p><strong>app</strong> – </p>
+</dd>
+<dt class="field-even">返回</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="blog.register_shell_context">
+<code class="sig-prename descclassname">blog.</code><code class="sig-name descname">register_shell_context</code><span class="sig-paren">(</span><em class="sig-param">app</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog.html#register_shell_context"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.register_shell_context" title="永久链接至目标">¶</a></dt>
+<dd><p>注册shell执行环境</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="blog.register_template_context">
+<code class="sig-prename descclassname">blog.</code><code class="sig-name descname">register_template_context</code><span class="sig-paren">(</span><em class="sig-param">app</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog.html#register_template_context"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.register_template_context" title="永久链接至目标">¶</a></dt>
+<dd><p>注册模板上下文处理函数
+1。 蓝图对象可以使用app.context_processor装饰器为模板注册模板上下文处理函数，模板上下文处理函数的作用就是</p>
+<blockquote>
+<div><p>为模板添加一些在模板中需要使用的变量，这样可以避免每次显示的传入模板</p>
+</div></blockquote>
+<dl class="simple">
+<dt>2。 同样的，使用蓝图对象注册的模板上下文，只可以在特有的蓝图模板中使用，也可以使用蓝图对象.app_context_processor</dt><dd><p>注册全局的模板上下文处理函数</p>
+</dd>
+<dt>3。 蓝图对象也可以使用app_template_global(), app_template_filter(), app_template_test()装饰器，用来注册</dt><dd><p>全局的模板全局函数，模板过滤器和模板测试器</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">blog</a></h1>
+
+
+
+
+
+
+
+
+<h3>导航</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">blog</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">blog package</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="modules.html">blog</a><ul>
+      <li>Previous: <a href="modules.html" title="上一章">blog</a></li>
+      <li>Next: <a href="blog.blueprints.html" title="下一章">blog.blueprints package</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">快速搜索</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="转向" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, wangdong.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/blog.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

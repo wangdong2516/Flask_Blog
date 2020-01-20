@@ -1,0 +1,302 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_cn">
+  <head>
+    <meta charset="utf-8" />
+    <title>blog.blueprints.blog &#8212; blog 0.1 文档</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    <script type="text/javascript" src="../../../_static/translations.js"></script>
+    <link rel="index" title="索引" href="../../../genindex.html" />
+    <link rel="search" title="搜索" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>blog.blueprints.blog 源代码</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    博客蓝图</span>
+
+<span class="sd">    为蓝图增加蓝图的路由的两种方式：</span>
+<span class="sd">        1. 使用装饰器，蓝图对象.route()  --&gt;  先将路由注册到蓝图对象上，当将蓝图对象注册到程序实例上的时候，在将路由注册到程序实例上</span>
+
+<span class="sd">            对于蓝图对象的理解：</span>
+<span class="sd">                1。 蓝图对象是一种命名空间，使用蓝图对象添加的路由，都属于蓝图对象的命名空间上，可以通过app.url_map()来查看</span>
+<span class="sd">                    Rule(&#39;/index&#39;),  蓝图对象.endpoint  view_func()</span>
+<span class="sd">                2.  使用蓝图对象可以实现项目结构的有序化的组织，可以将程序分离成不同的部分</span>
+<span class="sd">        2. app.add_url_rule(rule, endpoint, view_func)</span>
+<span class="sd">            在路由中，视图函数和url规则不是直接映射的，之所以不直接映射，是为了实现蓝图的命名空间</span>
+<span class="sd">            如果存在多个同名的视图函数，会存在路由的冲突，增加了端点名作为媒介，可以实现不同命名空间的映射</span>
+
+<span class="sd">    paginate()分页的使用：</span>
+<span class="sd">        1。 接受的参数：page --&gt; 页数  per-page --&gt; 每页的个数， error_out ---&gt; 当查询的页数超过总页数的行为</span>
+<span class="sd">            max_per_page --&gt; 设置每页查询的最大数量</span>
+<span class="sd">            当error_out参数设置为True的时候，如果查询的页数超过最大值，或者是page或者per_page为负数或者非整型值的时候</span>
+<span class="sd">            会返回404错误，如果设置为False，直接返回None，默认是True</span>
+
+<span class="sd">        2. 对查询结果使用paginate方法传入相应的参数，可以返回一个分页对象，包含分页的信息</span>
+<span class="sd">            分页对象一些常见的属性：</span>
+<span class="sd">                has_next  ---&gt;    是否包含下一页，包含的时候返回True，不包含的时候返回False</span>
+<span class="sd">                has_prev  ---&gt;    是否包含上一页，包含返回true，不包含返回false</span>
+<span class="sd">                items     ---&gt;    返回分页之后的数据</span>
+<span class="sd">                next_num  ---&gt;    下一页的页数，没有下一页返回None</span>
+<span class="sd">                prev_num  ---&gt;    上一页的页数，没有上一页返回None</span>
+<span class="sd">                page      ---&gt;    当前的页数</span>
+<span class="sd">                pages     ---&gt;    总页数</span>
+<span class="sd">                per_page  ---&gt;    每页的个数</span>
+<span class="sd">                query     ---&gt;    分页的查询语句</span>
+<span class="sd">                total     ---&gt;    总的记录的数量</span>
+<span class="sd">            如果没有指定page参数和per_page参数，flask_sqlalchemy会自动从查询字符串中寻找对应的值</span>
+<span class="sd">            如果没有获取到，，使用默认值，page=1，per_page=20</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">Blueprint</span>
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">request</span>
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">current_app</span>
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">render_template</span>
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">abort</span>
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">make_response</span>
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">flash</span>
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">redirect</span>
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">url_for</span>
+<span class="kn">from</span> <span class="nn">flask_login</span> <span class="kn">import</span> <span class="n">current_user</span>
+
+<span class="kn">from</span> <span class="nn">blog.models</span> <span class="kn">import</span> <span class="n">Post</span><span class="p">,</span> <span class="n">Category</span><span class="p">,</span> <span class="n">Comment</span>
+<span class="kn">from</span> <span class="nn">blog.utils</span> <span class="kn">import</span> <span class="n">redirect_back</span>
+<span class="kn">from</span> <span class="nn">blog.forms</span> <span class="kn">import</span> <span class="n">AdminCommentForm</span><span class="p">,</span> <span class="n">CommentForm</span>
+<span class="kn">from</span> <span class="nn">blog.extensions</span> <span class="kn">import</span> <span class="n">db</span>
+
+<span class="n">blog_bp</span> <span class="o">=</span> <span class="n">Blueprint</span><span class="p">(</span><span class="s1">&#39;blog&#39;</span><span class="p">,</span> <span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="index"><a class="viewcode-back" href="../../../blog.blueprints.html#blog.blueprints.blog.index">[文档]</a><span class="nd">@blog_bp</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">index</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;首页视图&quot;&quot;&quot;</span>
+    <span class="n">page</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;page&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">per_page</span> <span class="o">=</span> <span class="n">current_app</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;BLUELOG_POST_PER_PAGE&#39;</span><span class="p">]</span>
+    <span class="n">pagination</span> <span class="o">=</span> <span class="n">Post</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="n">Post</span><span class="o">.</span><span class="n">timestamp</span><span class="o">.</span><span class="n">desc</span><span class="p">())</span><span class="o">.</span><span class="n">paginate</span><span class="p">(</span><span class="n">page</span><span class="p">,</span> <span class="n">per_page</span><span class="o">=</span><span class="n">per_page</span><span class="p">)</span>  <span class="c1"># 生成一个分页对象</span>
+    <span class="n">posts</span> <span class="o">=</span> <span class="n">pagination</span><span class="o">.</span><span class="n">items</span>   <span class="c1"># 获取经过分页的数据</span>
+
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;blog/index.html&#39;</span><span class="p">,</span> <span class="n">pagination</span><span class="o">=</span><span class="n">pagination</span><span class="p">,</span> <span class="n">posts</span><span class="o">=</span><span class="n">posts</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="about"><a class="viewcode-back" href="../../../blog.blueprints.html#blog.blueprints.blog.about">[文档]</a><span class="nd">@blog_bp</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/about&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">about</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;展示关于的信息&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;blog/about.html&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="show_category"><a class="viewcode-back" href="../../../blog.blueprints.html#blog.blueprints.blog.show_category">[文档]</a><span class="nd">@blog_bp</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/category/&lt;int:category_id&gt;&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">show_category</span><span class="p">(</span><span class="n">category_id</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        分类文章列表(边栏的分页文章)</span>
+
+<span class="sd">        直接调用category.posts，会以列表的形式返回分类对应的文章，但是无法再次使用查询过滤器</span>
+<span class="sd">        使用with_parent方法会返回查询的对象，可以链式调用查询过滤器</span>
+<span class="sd">    :param category_id: 分类id</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">category</span> <span class="o">=</span> <span class="n">Category</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">get_or_404</span><span class="p">(</span><span class="n">category_id</span><span class="p">)</span>  <span class="c1"># 获取当前的分类</span>
+    <span class="n">page</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;page&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">per_page</span> <span class="o">=</span> <span class="n">current_app</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;BLUELOG_POST_PER_PAGE&#39;</span><span class="p">]</span>
+
+    <span class="c1"># 获取分页对象</span>
+    <span class="n">pagination</span> <span class="o">=</span> <span class="n">Post</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">with_parent</span><span class="p">(</span><span class="n">category</span><span class="p">)</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span>
+        <span class="n">Post</span><span class="o">.</span><span class="n">timestamp</span><span class="o">.</span><span class="n">desc</span><span class="p">())</span><span class="o">.</span><span class="n">paginate</span><span class="p">(</span><span class="n">page</span><span class="p">,</span> <span class="n">per_page</span><span class="o">=</span><span class="n">per_page</span><span class="p">)</span>
+
+    <span class="c1"># 获取分页数据</span>
+    <span class="n">posts</span> <span class="o">=</span> <span class="n">pagination</span><span class="o">.</span><span class="n">items</span>
+
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span>
+        <span class="s1">&#39;blog/category.html&#39;</span><span class="p">,</span> <span class="n">pagination</span><span class="o">=</span><span class="n">pagination</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="n">category</span><span class="p">,</span> <span class="n">posts</span><span class="o">=</span><span class="n">posts</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="show_post"><a class="viewcode-back" href="../../../blog.blueprints.html#blog.blueprints.blog.show_post">[文档]</a><span class="nd">@blog_bp</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/show_post/&lt;int:post_id&gt;&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">show_post</span><span class="p">(</span><span class="n">post_id</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        博客文章视图</span>
+<span class="sd">    :param post_id: 文章id</span>
+<span class="sd">    :return: 模板</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">post</span> <span class="o">=</span> <span class="n">Post</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">get_or_404</span><span class="p">(</span><span class="n">post_id</span><span class="p">)</span>
+    <span class="n">page</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;page&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">per_page</span> <span class="o">=</span> <span class="n">current_app</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;BLUELOG_COMMENT_PER_PAGE&#39;</span><span class="p">]</span>
+    <span class="c1"># 显示已经通过审核的评论</span>
+    <span class="n">pagination</span> <span class="o">=</span> <span class="n">Comment</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">with_parent</span><span class="p">(</span><span class="n">post</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">reviewed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span>
+        <span class="n">Comment</span><span class="o">.</span><span class="n">timestamp</span><span class="o">.</span><span class="n">asc</span><span class="p">())</span><span class="o">.</span><span class="n">paginate</span><span class="p">(</span><span class="n">page</span><span class="p">,</span> <span class="n">per_page</span><span class="p">)</span>
+    <span class="n">comments</span> <span class="o">=</span> <span class="n">pagination</span><span class="o">.</span><span class="n">items</span>
+
+    <span class="k">if</span> <span class="n">current_user</span><span class="o">.</span><span class="n">is_authenticated</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;如果当前的用户已经登陆，使用管理员的表单&quot;&quot;&quot;</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="n">AdminCommentForm</span><span class="p">()</span>
+        <span class="n">form</span><span class="o">.</span><span class="n">author</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">current_user</span><span class="o">.</span><span class="n">name</span>
+        <span class="n">form</span><span class="o">.</span><span class="n">email</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">current_app</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;BLUELOG_EMAIL&#39;</span><span class="p">]</span>
+        <span class="n">form</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">url_for</span><span class="p">(</span><span class="s1">&#39;.index&#39;</span><span class="p">)</span>
+        <span class="n">from_admin</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">reviewed</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="n">CommentForm</span><span class="p">()</span>
+        <span class="n">from_admin</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">reviewed</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">if</span> <span class="n">form</span><span class="o">.</span><span class="n">validate_on_submit</span><span class="p">():</span>
+        <span class="sd">&quot;&quot;&quot;当表单认证通过的时候执行的操作&quot;&quot;&quot;</span>
+        <span class="n">author</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">author</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">email</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">email</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">site</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">email</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">body</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">body</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">comment</span> <span class="o">=</span> <span class="n">Comment</span><span class="p">(</span>
+            <span class="n">author</span><span class="o">=</span><span class="n">author</span><span class="p">,</span> <span class="n">email</span><span class="o">=</span><span class="n">email</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="n">body</span><span class="p">,</span>
+            <span class="n">from_admin</span><span class="o">=</span><span class="n">from_admin</span><span class="p">,</span> <span class="n">post</span><span class="o">=</span><span class="n">post</span><span class="p">,</span> <span class="n">reviewed</span><span class="o">=</span><span class="n">reviewed</span>
+        <span class="p">)</span>
+        <span class="n">reply_id</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;reply&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">reply_id</span><span class="p">:</span>
+            <span class="n">comment</span> <span class="o">=</span> <span class="n">Comment</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">get_or_404</span><span class="p">(</span><span class="n">reply_id</span><span class="p">)</span>
+            <span class="n">comment</span><span class="o">.</span><span class="n">replied_id</span> <span class="o">=</span> <span class="n">reply_id</span>
+
+        <span class="n">db</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">comment</span><span class="p">)</span>
+        <span class="n">db</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">current_user</span><span class="o">.</span><span class="n">is_authenticated</span><span class="p">:</span>
+            <span class="n">flash</span><span class="p">(</span><span class="s1">&#39;评论成功&#39;</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">flash</span><span class="p">(</span><span class="s1">&#39;你的评论已经提交，等待管理员的审核&#39;</span><span class="p">)</span>
+            <span class="c1"># send_comment_email(post)  # 发送邮件</span>
+        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">url_for</span><span class="p">(</span><span class="s1">&#39;.show_post&#39;</span><span class="p">,</span> <span class="n">post_id</span><span class="o">=</span><span class="n">post_id</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span>
+        <span class="s1">&#39;/blog/post.html&#39;</span><span class="p">,</span> <span class="n">post</span><span class="o">=</span><span class="n">post</span><span class="p">,</span> <span class="n">pagination</span><span class="o">=</span><span class="n">pagination</span><span class="p">,</span>
+        <span class="n">comments</span><span class="o">=</span><span class="n">comments</span><span class="p">,</span> <span class="n">form</span><span class="o">=</span><span class="n">form</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="change_theme"><a class="viewcode-back" href="../../../blog.blueprints.html#blog.blueprints.blog.change_theme">[文档]</a><span class="nd">@blog_bp</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/change-theme/&lt;theme_name&gt;&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">change_theme</span><span class="p">(</span><span class="n">theme_name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        博客切换主体视图</span>
+<span class="sd">        1.  将主题的名称存储在cookie中，名称为theme</span>
+<span class="sd">    :param theme_name: 主体名</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># 判断配置项是否合法</span>
+    <span class="k">if</span> <span class="n">theme_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">current_app</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;BLUELOG_THEMES&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">abort</span><span class="p">(</span><span class="mi">400</span><span class="p">)</span>
+
+    <span class="n">response</span> <span class="o">=</span> <span class="n">make_response</span><span class="p">(</span><span class="n">redirect_back</span><span class="p">())</span>
+
+    <span class="c1"># set_cookie方法接受key ---&gt; cookie名  value=&quot;&quot;  --&gt; cookie值, max_age=None, 过期时间  expires=None  --&gt; 有效期,</span>
+    <span class="c1"># 这里设置cookie的过期时间为30天</span>
+    <span class="n">response</span><span class="o">.</span><span class="n">set_cookie</span><span class="p">(</span><span class="s1">&#39;theme&#39;</span><span class="p">,</span> <span class="n">theme_name</span><span class="p">,</span> <span class="n">max_age</span><span class="o">=</span><span class="mi">30</span><span class="o">*</span><span class="mi">24</span><span class="o">*</span><span class="mi">60</span><span class="o">*</span><span class="mi">60</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">response</span></div>
+
+
+<div class="viewcode-block" id="reply_comment"><a class="viewcode-back" href="../../../blog.blueprints.html#blog.blueprints.blog.reply_comment">[文档]</a><span class="nd">@blog_bp</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/reply/comment/&lt;int:comment_id&gt;&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">reply_comment</span><span class="p">(</span><span class="n">comment_id</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        回复评论</span>
+<span class="sd">    :param comment_id: 评论id</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">comment</span> <span class="o">=</span> <span class="n">Comment</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">get_or_404</span><span class="p">(</span><span class="n">comment_id</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">comment</span><span class="o">.</span><span class="n">post</span><span class="o">.</span><span class="n">can_comment</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;如果当前评论对应的文章不支持评论&quot;&quot;&quot;</span>
+        <span class="n">flash</span><span class="p">(</span><span class="s1">&#39;当前文章不支持评论，请申请管理员开启评论&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">url_for</span><span class="p">(</span><span class="s1">&#39;.show_post&#39;</span><span class="p">,</span> <span class="n">post_id</span><span class="o">=</span><span class="n">comment</span><span class="o">.</span><span class="n">post_id</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span>
+        <span class="n">url_for</span><span class="p">(</span><span class="s1">&#39;.show_post&#39;</span><span class="p">,</span> <span class="n">post_id</span><span class="o">=</span><span class="n">comment</span><span class="o">.</span><span class="n">post_id</span><span class="p">,</span> <span class="n">reply</span><span class="o">=</span><span class="n">comment_id</span><span class="p">,</span> <span class="n">auth</span><span class="o">=</span><span class="n">comment</span><span class="o">.</span><span class="n">author</span><span class="p">)</span>
+    <span class="p">)</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">blog</a></h1>
+
+
+
+
+
+
+
+
+<h3>导航</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">blog</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">模块代码</a><ul>
+  <li><a href="../../blog.html">blog</a><ul>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">快速搜索</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="转向" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, wangdong.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

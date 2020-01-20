@@ -1,0 +1,576 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_cn">
+  <head>
+    <meta charset="utf-8" />
+    <title>blog.blueprints.admin &#8212; blog 0.1 文档</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    <script type="text/javascript" src="../../../_static/translations.js"></script>
+    <link rel="index" title="索引" href="../../../genindex.html" />
+    <link rel="search" title="搜索" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>blog.blueprints.admin 源代码</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    管理员</span>
+
+<span class="sd">    url_for接受一个函数名作为参数，也接受对应url规则的命名变量</span>
+<span class="sd">    未知的变量会添加到url尾部作为查询字符串</span>
+
+<span class="sd">    flask中request对象的实现原理：</span>
+<span class="sd">        1。 Thread Local</span>
+<span class="sd">            每一个请求是一个独立的线程，请求之间的信息需要完全隔离开。避免冲突，实现线程安全</span>
+<span class="sd">            Thread Local是一种特殊状态的对象，状态对于线程是隔离的，线程对Thread Local的修改</span>
+<span class="sd">            并不会影响到其他的线程</span>
+<span class="sd">        2. 主要的实现依赖于三个类：</span>
+<span class="sd">            Local， LocalStack， LocalProxy</span>
+
+<span class="sd">            __solts__类变量的作用是限制添加到实例对象上的属性</span>
+<span class="sd">            __storage = {线程ID：{name: value}}</span>
+<span class="sd">            线程ID通过掉用get_ident函数来实现</span>
+
+<span class="sd">            比如：</span>
+<span class="sd">                获取local.age属性的时候 --&gt; 触发__getattr__函数</span>
+<span class="sd">                内部调用get_ident函数获取当前线程的ID，然后去__storage</span>
+<span class="sd">                字典中进行查找是否存在对应的属性</span>
+<span class="sd">                设置属性的时候也是同理</span>
+<span class="sd">            __release_local__ 就是将当前的线程从__storage字典中删除</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">Blueprint</span><span class="p">,</span> <span class="n">send_from_directory</span>
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">render_template</span>
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">request</span>
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">current_app</span>
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">flash</span>
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">redirect</span>
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">url_for</span>
+<span class="kn">from</span> <span class="nn">flask_dropzone</span> <span class="kn">import</span> <span class="n">random_filename</span>
+
+<span class="kn">from</span> <span class="nn">flask_login</span> <span class="kn">import</span> <span class="n">login_required</span><span class="p">,</span> <span class="n">current_user</span>
+<span class="kn">from</span> <span class="nn">blog.models</span> <span class="kn">import</span> <span class="n">Post</span><span class="p">,</span> <span class="n">Category</span><span class="p">,</span> <span class="n">Comment</span><span class="p">,</span> <span class="n">Link</span><span class="p">,</span> <span class="n">Admin</span>
+<span class="kn">from</span> <span class="nn">blog.forms</span> <span class="kn">import</span> <span class="n">PostForm</span><span class="p">,</span> <span class="n">CategoryForm</span><span class="p">,</span> <span class="n">LinkForm</span><span class="p">,</span> <span class="n">SettingForm</span><span class="p">,</span> <span class="n">UploadForm</span>
+<span class="kn">from</span> <span class="nn">blog.extensions</span> <span class="kn">import</span> <span class="n">db</span>
+<span class="kn">from</span> <span class="nn">blog.utils</span> <span class="kn">import</span> <span class="n">redirect_back</span><span class="p">,</span> <span class="n">commit_data</span>
+<span class="kn">from</span> <span class="nn">blog.utils</span> <span class="kn">import</span> <span class="n">confirm_required</span>
+<span class="kn">from</span> <span class="nn">blog.utils</span> <span class="kn">import</span> <span class="n">resize_avatar</span>
+<span class="kn">from</span> <span class="nn">flask_ckeditor</span> <span class="kn">import</span> <span class="n">upload_fail</span><span class="p">,</span> <span class="n">upload_success</span>
+<span class="n">admin_bp</span> <span class="o">=</span> <span class="n">Blueprint</span><span class="p">(</span><span class="s1">&#39;admin_bp&#39;</span><span class="p">,</span> <span class="vm">__name__</span><span class="p">)</span>  <span class="c1"># 创建蓝图对象</span>
+
+
+<div class="viewcode-block" id="settings"><a class="viewcode-back" href="../../../blog.blueprints.html#blog.blueprints.admin.settings">[文档]</a><span class="nd">@admin_bp</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/settings&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+<span class="nd">@login_required</span>
+<span class="nd">@confirm_required</span>
+<span class="k">def</span> <span class="nf">settings</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        博客的设置页面</span>
+
+<span class="sd">        login_required装饰器实现了视图保护，只有登录之后的用户才能访问被视图保护装饰的视图函数</span>
+
+<span class="sd">        ** 当为视图函数添加多个装饰器的时候，route装饰器应该位于最外层</span>
+
+<span class="sd">        当未登录的用户访问需要登录才能请求的视图函数的时候，如果添加了login_required装饰器</span>
+<span class="sd">        程序会自动重定向到登录页面，此时需要通过login_manager的login_view属性设置重定向的视图函数</span>
+<span class="sd">        并且通过login_message_category设置提示消息的类别，login_message设置提示消息的内容</span>
+<span class="sd">        具体见extensions文件</span>
+
+<span class="sd">        在重定向的url中，会自动包含上一个页面的next参数，当登录了之后，会自动重定向到next参数指定的页面</span>
+
+<span class="sd">        如果想为整个蓝图添加视图保护，可以使用请求钩子，添加login_required装饰器</span>
+
+<span class="sd">        常见的响应状态码：</span>
+<span class="sd">            200   成功</span>
+<span class="sd">            201   请求成功，并且新建了资源</span>
+<span class="sd">            204   请求成功，但是没有内容返回</span>
+<span class="sd">            301   永久重定向</span>
+<span class="sd">            302   临时重定向</span>
+<span class="sd">            304   请求的内容没有修改，Not Modified 重定向到缓存</span>
+<span class="sd">            404   请求的资源不存在</span>
+<span class="sd">            400   请求参数不正确</span>
+<span class="sd">            401   请求的用户没有认证</span>
+<span class="sd">            403   请求的用户没有权限</span>
+<span class="sd">            500   服务器内部错误</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">form</span> <span class="o">=</span> <span class="n">SettingForm</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">form</span><span class="o">.</span><span class="n">validate_on_submit</span><span class="p">():</span>
+        <span class="n">current_user</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">current_user</span><span class="o">.</span><span class="n">blog_title</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">blog_title</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">current_user</span><span class="o">.</span><span class="n">blog_sub_title</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">blog_sub_title</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">current_user</span><span class="o">.</span><span class="n">about</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">about</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">commit_data</span><span class="p">(</span><span class="s1">&#39;add&#39;</span><span class="p">,</span> <span class="n">current_user</span><span class="p">)</span>
+        <span class="n">flash</span><span class="p">(</span><span class="s1">&#39;修改设置成功&#39;</span><span class="p">,</span> <span class="s1">&#39;success&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">url_for</span><span class="p">(</span><span class="s1">&#39;blog.index&#39;</span><span class="p">))</span>
+    <span class="n">form</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">current_user</span><span class="o">.</span><span class="n">name</span>
+    <span class="n">form</span><span class="o">.</span><span class="n">blog_title</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">current_user</span><span class="o">.</span><span class="n">blog_title</span>
+    <span class="n">form</span><span class="o">.</span><span class="n">blog_sub_title</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">current_user</span><span class="o">.</span><span class="n">blog_sub_title</span>
+    <span class="n">form</span><span class="o">.</span><span class="n">about</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">current_user</span><span class="o">.</span><span class="n">about</span>
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;admin/settings.html&#39;</span><span class="p">,</span> <span class="n">form</span><span class="o">=</span><span class="n">form</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="manage_post"><a class="viewcode-back" href="../../../blog.blueprints.html#blog.blueprints.admin.manage_post">[文档]</a><span class="nd">@admin_bp</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/post/manage&#39;</span><span class="p">)</span>
+<span class="nd">@login_required</span>
+<span class="nd">@confirm_required</span>
+<span class="k">def</span> <span class="nf">manage_post</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        文章管理页面</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">page</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;page&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">per_page</span> <span class="o">=</span> <span class="n">current_app</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;BLUELOG_MANAGE_POST_PER_PAGE&#39;</span><span class="p">]</span>
+
+    <span class="n">pagination</span> <span class="o">=</span> <span class="n">Post</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="n">Post</span><span class="o">.</span><span class="n">timestamp</span><span class="o">.</span><span class="n">desc</span><span class="p">())</span><span class="o">.</span><span class="n">paginate</span><span class="p">(</span><span class="n">page</span><span class="p">,</span> <span class="n">per_page</span><span class="o">=</span><span class="n">per_page</span><span class="p">)</span>
+
+    <span class="n">posts</span> <span class="o">=</span> <span class="n">pagination</span><span class="o">.</span><span class="n">items</span>
+
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;admin/manage_post.html&#39;</span><span class="p">,</span> <span class="n">posts</span><span class="o">=</span><span class="n">posts</span><span class="p">,</span> <span class="n">pagination</span><span class="o">=</span><span class="n">pagination</span><span class="p">,</span> <span class="n">page</span><span class="o">=</span><span class="n">page</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="new_post"><a class="viewcode-back" href="../../../blog.blueprints.html#blog.blueprints.admin.new_post">[文档]</a><span class="nd">@admin_bp</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/post/new&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+<span class="nd">@login_required</span>
+<span class="nd">@confirm_required</span>
+<span class="k">def</span> <span class="nf">new_post</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        添加文章页面</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">form</span> <span class="o">=</span> <span class="n">PostForm</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">form</span><span class="o">.</span><span class="n">validate_on_submit</span><span class="p">():</span>
+        <span class="sd">&quot;&quot;&quot;表单验证通过&quot;&quot;&quot;</span>
+        <span class="n">title</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">title</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">body</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">body</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">category</span> <span class="o">=</span> <span class="n">Category</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">form</span><span class="o">.</span><span class="n">category</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+        <span class="c1"># category_id = form.category.data  效果同上</span>
+        <span class="n">post</span> <span class="o">=</span> <span class="n">Post</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="n">body</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="n">category</span><span class="p">)</span>
+        <span class="n">db</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">post</span><span class="p">)</span>
+        <span class="n">db</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+        <span class="n">flash</span><span class="p">(</span><span class="s1">&#39;保存成功&#39;</span><span class="p">,</span> <span class="s1">&#39;success&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">url_for</span><span class="p">(</span><span class="s1">&#39;blog.show_post&#39;</span><span class="p">,</span> <span class="n">post_id</span><span class="o">=</span><span class="n">post</span><span class="o">.</span><span class="n">id</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;admin/new_post.html&#39;</span><span class="p">,</span> <span class="n">form</span><span class="o">=</span><span class="n">form</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="new_category"><a class="viewcode-back" href="../../../blog.blueprints.html#blog.blueprints.admin.new_category">[文档]</a><span class="nd">@admin_bp</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/new/category&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+<span class="nd">@login_required</span>
+<span class="nd">@confirm_required</span>
+<span class="k">def</span> <span class="nf">new_category</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        新建文章分类</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">form</span> <span class="o">=</span> <span class="n">CategoryForm</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">form</span><span class="o">.</span><span class="n">validate_on_submit</span><span class="p">():</span>
+        <span class="sd">&quot;&quot;&quot;进行表单验证的时候，会自动查找当前的类中是否存在validate_字段名开头的属性</span>
+<span class="sd">           如果存在的话，会在验证的时候，将这部分的数据也进行验证</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">data</span>
+        <span class="k">if</span> <span class="n">Category</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">Category</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">():</span>
+            <span class="n">flash</span><span class="p">(</span><span class="s1">&#39;当前分类已经存在，请勿重复添加&#39;</span><span class="p">,</span> <span class="s1">&#39;warning&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">redirect_back</span><span class="p">()</span>
+        <span class="n">category</span> <span class="o">=</span> <span class="n">Category</span><span class="p">()</span>
+        <span class="n">category</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+
+        <span class="n">commit_data</span><span class="p">(</span><span class="s1">&#39;add&#39;</span><span class="p">,</span> <span class="n">category</span><span class="p">)</span>
+        <span class="n">flash</span><span class="p">(</span><span class="s1">&#39;添加新分类成功！&#39;</span><span class="p">,</span> <span class="s1">&#39;success&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">url_for</span><span class="p">(</span><span class="s1">&#39;admin_bp.manage_category&#39;</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;admin/new_category.html&#39;</span><span class="p">,</span> <span class="n">form</span><span class="o">=</span><span class="n">form</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="new_link"><a class="viewcode-back" href="../../../blog.blueprints.html#blog.blueprints.admin.new_link">[文档]</a><span class="nd">@admin_bp</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/new/link&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+<span class="nd">@login_required</span>
+<span class="nd">@confirm_required</span>
+<span class="k">def</span> <span class="nf">new_link</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        新建链接</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">form</span> <span class="o">=</span> <span class="n">LinkForm</span><span class="p">()</span>
+    <span class="n">link</span> <span class="o">=</span> <span class="n">Link</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">form</span><span class="o">.</span><span class="n">validate_on_submit</span><span class="p">():</span>
+        <span class="n">link</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">link</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">url</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">commit_data</span><span class="p">(</span><span class="s1">&#39;add&#39;</span><span class="p">,</span> <span class="n">link</span><span class="p">)</span>
+        <span class="n">flash</span><span class="p">(</span><span class="s1">&#39;新建链接成功&#39;</span><span class="p">,</span> <span class="s1">&#39;success&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">url_for</span><span class="p">(</span><span class="s1">&#39;admin_bp.manage_link&#39;</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;admin/new_link.html&#39;</span><span class="p">,</span> <span class="n">form</span><span class="o">=</span><span class="n">form</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="manage_category"><a class="viewcode-back" href="../../../blog.blueprints.html#blog.blueprints.admin.manage_category">[文档]</a><span class="nd">@admin_bp</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/category/manage&#39;</span><span class="p">)</span>
+<span class="nd">@login_required</span>
+<span class="nd">@confirm_required</span>
+<span class="k">def</span> <span class="nf">manage_category</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        管理分类</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;admin/manage_category.html&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="edit_category"><a class="viewcode-back" href="../../../blog.blueprints.html#blog.blueprints.admin.edit_category">[文档]</a><span class="nd">@admin_bp</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/category/&lt;int:category_id&gt;/edit&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+<span class="nd">@login_required</span>
+<span class="nd">@confirm_required</span>
+<span class="k">def</span> <span class="nf">edit_category</span><span class="p">(</span><span class="n">category_id</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        编辑分类</span>
+<span class="sd">    :param category_id:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">form</span> <span class="o">=</span> <span class="n">CategoryForm</span><span class="p">()</span>
+    <span class="n">category</span> <span class="o">=</span> <span class="n">Category</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">category_id</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">form</span><span class="o">.</span><span class="n">validate_on_submit</span><span class="p">():</span>
+        <span class="n">category</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">commit_data</span><span class="p">(</span><span class="s1">&#39;add&#39;</span><span class="p">,</span> <span class="n">category</span><span class="p">)</span>
+        <span class="n">flash</span><span class="p">(</span><span class="s1">&#39;编辑成功&#39;</span><span class="p">,</span> <span class="s1">&#39;success&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">url_for</span><span class="p">(</span><span class="s1">&#39;admin_bp.manage_category&#39;</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;admin/edit_category.html&#39;</span><span class="p">,</span> <span class="n">form</span><span class="o">=</span><span class="n">form</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="delete_category"><a class="viewcode-back" href="../../../blog.blueprints.html#blog.blueprints.admin.delete_category">[文档]</a><span class="nd">@admin_bp</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/category/&lt;int:category_id&gt;/delete&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+<span class="nd">@login_required</span>
+<span class="nd">@confirm_required</span>
+<span class="k">def</span> <span class="nf">delete_category</span><span class="p">(</span><span class="n">category_id</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        删除分类</span>
+<span class="sd">    :param category_id:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">category</span> <span class="o">=</span> <span class="n">Category</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">get_or_404</span><span class="p">(</span><span class="n">category_id</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">category</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;Default&#39;</span><span class="p">:</span>
+        <span class="n">flash</span><span class="p">(</span><span class="s1">&#39;不允许删除默认的分类&#39;</span><span class="p">,</span> <span class="s1">&#39;warning&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">url_for</span><span class="p">(</span><span class="s1">&#39;admin_bp.manage_category&#39;</span><span class="p">))</span>
+
+    <span class="n">category</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+
+    <span class="n">flash</span><span class="p">(</span><span class="s1">&#39;删除该分类成功&#39;</span><span class="p">,</span> <span class="s1">&#39;success&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">url_for</span><span class="p">(</span><span class="s1">&#39;admin_bp.manage_category&#39;</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="manage_comment"><a class="viewcode-back" href="../../../blog.blueprints.html#blog.blueprints.admin.manage_comment">[文档]</a><span class="nd">@admin_bp</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/comment/manage&#39;</span><span class="p">)</span>
+<span class="nd">@login_required</span>
+<span class="nd">@confirm_required</span>
+<span class="k">def</span> <span class="nf">manage_comment</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        管理评论</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">filter_</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;filter&#39;</span><span class="p">,</span> <span class="s1">&#39;all&#39;</span><span class="p">)</span>  <span class="c1"># 获取评论页面的筛选规则</span>
+    <span class="n">page</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;page&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">per_page</span> <span class="o">=</span> <span class="n">current_app</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;BLUELOG_COMMENT_PER_PAGE&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">filter_</span> <span class="o">==</span> <span class="s1">&#39;admin&#39;</span><span class="p">:</span>
+        <span class="c1"># 来自管理员的评论</span>
+        <span class="n">pagination</span> <span class="o">=</span> <span class="n">Comment</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">from_admin</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span>
+            <span class="n">Comment</span><span class="o">.</span><span class="n">timestamp</span><span class="o">.</span><span class="n">desc</span><span class="p">())</span><span class="o">.</span><span class="n">paginate</span><span class="p">(</span><span class="n">page</span><span class="p">,</span> <span class="n">per_page</span><span class="o">=</span><span class="n">per_page</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">filter_</span> <span class="o">==</span> <span class="s1">&#39;unread&#39;</span><span class="p">:</span>
+        <span class="c1"># 未读评论</span>
+        <span class="n">pagination</span> <span class="o">=</span> <span class="n">Comment</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">reviewed</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span>
+            <span class="n">Comment</span><span class="o">.</span><span class="n">timestamp</span><span class="o">.</span><span class="n">desc</span><span class="p">())</span><span class="o">.</span><span class="n">paginate</span><span class="p">(</span><span class="n">page</span><span class="p">,</span> <span class="n">per_page</span><span class="o">=</span><span class="n">per_page</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">pagination</span> <span class="o">=</span> <span class="n">Comment</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span>
+            <span class="n">Comment</span><span class="o">.</span><span class="n">timestamp</span><span class="o">.</span><span class="n">desc</span><span class="p">())</span><span class="o">.</span><span class="n">paginate</span><span class="p">(</span><span class="n">page</span><span class="p">,</span> <span class="n">per_page</span><span class="o">=</span><span class="n">per_page</span><span class="p">)</span>  <span class="c1"># 获取所有未审核评论</span>
+
+    <span class="n">comments</span> <span class="o">=</span> <span class="n">pagination</span><span class="o">.</span><span class="n">items</span>
+
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span>
+        <span class="s1">&#39;admin/manage_comment.html&#39;</span><span class="p">,</span> <span class="n">comments</span><span class="o">=</span><span class="n">comments</span><span class="p">,</span>
+        <span class="n">pagination</span><span class="o">=</span><span class="n">pagination</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="manage_link"><a class="viewcode-back" href="../../../blog.blueprints.html#blog.blueprints.admin.manage_link">[文档]</a><span class="nd">@admin_bp</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/link/manage&#39;</span><span class="p">)</span>
+<span class="nd">@login_required</span>
+<span class="nd">@confirm_required</span>
+<span class="k">def</span> <span class="nf">manage_link</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        管理链接，这里的链接之所以能不传入模板</span>
+<span class="sd">        是因为在模板上下文处理函数中默认传入模板中的</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;admin/manage_link.html&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="edit_link"><a class="viewcode-back" href="../../../blog.blueprints.html#blog.blueprints.admin.edit_link">[文档]</a><span class="nd">@admin_bp</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/link/&lt;int:link_id&gt;/edit&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+<span class="nd">@login_required</span>
+<span class="nd">@confirm_required</span>
+<span class="k">def</span> <span class="nf">edit_link</span><span class="p">(</span><span class="n">link_id</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        编辑文章的链接</span>
+<span class="sd">    :param link_id:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">form</span> <span class="o">=</span> <span class="n">LinkForm</span><span class="p">()</span>
+    <span class="n">link</span> <span class="o">=</span> <span class="n">Link</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">get_or_404</span><span class="p">(</span><span class="n">link_id</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;当前指定的链接不存在&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">form</span><span class="o">.</span><span class="n">validate_on_submit</span><span class="p">():</span>
+        <span class="n">link</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">link</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">url</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">commit_data</span><span class="p">(</span><span class="s1">&#39;add&#39;</span><span class="p">,</span> <span class="n">link</span><span class="p">)</span>
+        <span class="n">flash</span><span class="p">(</span><span class="s1">&#39;编辑成功&#39;</span><span class="p">,</span> <span class="s1">&#39;success&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">url_for</span><span class="p">(</span><span class="s1">&#39;admin_bp.manage_link&#39;</span><span class="p">))</span>
+    <span class="n">form</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">link</span><span class="o">.</span><span class="n">name</span>
+    <span class="n">form</span><span class="o">.</span><span class="n">url</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">link</span><span class="o">.</span><span class="n">url</span>
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;admin/edit_link.html&#39;</span><span class="p">,</span> <span class="n">form</span><span class="o">=</span><span class="n">form</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="delete_link"><a class="viewcode-back" href="../../../blog.blueprints.html#blog.blueprints.admin.delete_link">[文档]</a><span class="nd">@admin_bp</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/link/&lt;int:link_id&gt;/delete&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+<span class="nd">@login_required</span>
+<span class="nd">@confirm_required</span>
+<span class="k">def</span> <span class="nf">delete_link</span><span class="p">(</span><span class="n">link_id</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        删除链接</span>
+<span class="sd">    :param link_id:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">link</span> <span class="o">=</span> <span class="n">Link</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">get_or_404</span><span class="p">(</span><span class="n">link_id</span><span class="p">)</span>
+    <span class="n">commit_data</span><span class="p">(</span><span class="s1">&#39;delete&#39;</span><span class="p">,</span> <span class="n">link</span><span class="p">)</span>
+    <span class="n">flash</span><span class="p">(</span><span class="s1">&#39;删除链接成功&#39;</span><span class="p">,</span> <span class="s1">&#39;success&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">url_for</span><span class="p">(</span><span class="s1">&#39;admin_bp.manage_link&#39;</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="edit_post"><a class="viewcode-back" href="../../../blog.blueprints.html#blog.blueprints.admin.edit_post">[文档]</a><span class="nd">@admin_bp</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/post/&lt;int:post_id&gt;/edit&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+<span class="nd">@login_required</span>
+<span class="nd">@confirm_required</span>
+<span class="k">def</span> <span class="nf">edit_post</span><span class="p">(</span><span class="n">post_id</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        编辑文章</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">post</span> <span class="o">=</span> <span class="n">Post</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">get_or_404</span><span class="p">(</span><span class="n">post_id</span><span class="p">)</span>
+    <span class="n">form</span> <span class="o">=</span> <span class="n">PostForm</span><span class="p">()</span>
+    <span class="c1"># form.category.choices = [(i.id, i.name) for i in Category.query.order_by(</span>
+    <span class="c1">#     Category.name).all()]  # 指定分类下拉选项的内容</span>
+    <span class="k">if</span> <span class="n">form</span><span class="o">.</span><span class="n">validate_on_submit</span><span class="p">():</span>
+        <span class="sd">&quot;&quot;&quot;表单验证通过的逻辑&quot;&quot;&quot;</span>
+        <span class="n">post</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">title</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">post</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">body</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">post</span><span class="o">.</span><span class="n">category_id</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">category</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">commit_data</span><span class="p">(</span><span class="s1">&#39;add&#39;</span><span class="p">,</span> <span class="n">post</span><span class="p">)</span>
+        <span class="n">flash</span><span class="p">(</span><span class="s1">&#39;编辑文章成功！！&#39;</span><span class="p">,</span> <span class="s1">&#39;success&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">url_for</span><span class="p">(</span><span class="s1">&#39;blog.show_post&#39;</span><span class="p">,</span> <span class="n">post_id</span><span class="o">=</span><span class="n">post</span><span class="o">.</span><span class="n">id</span><span class="p">))</span>
+
+    <span class="n">form</span><span class="o">.</span><span class="n">title</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">post</span><span class="o">.</span><span class="n">title</span>  <span class="c1"># 将文章的内容进行展示</span>
+    <span class="n">form</span><span class="o">.</span><span class="n">body</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">post</span><span class="o">.</span><span class="n">body</span>
+    <span class="n">form</span><span class="o">.</span><span class="n">category</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">post</span><span class="o">.</span><span class="n">category_id</span>
+
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;admin/edit_post.html&#39;</span><span class="p">,</span> <span class="n">form</span><span class="o">=</span><span class="n">form</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="delete_post"><a class="viewcode-back" href="../../../blog.blueprints.html#blog.blueprints.admin.delete_post">[文档]</a><span class="nd">@admin_bp</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/post/&lt;int:post_id&gt;/delete&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+<span class="nd">@login_required</span>
+<span class="nd">@confirm_required</span>
+<span class="k">def</span> <span class="nf">delete_post</span><span class="p">(</span><span class="n">post_id</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        删除文章</span>
+<span class="sd">    :param post_id:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">post</span> <span class="o">=</span> <span class="n">Post</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">get_or_404</span><span class="p">(</span><span class="n">post_id</span><span class="p">)</span>
+    <span class="n">db</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">post</span><span class="p">)</span>
+    <span class="n">db</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+    <span class="n">flash</span><span class="p">(</span><span class="s1">&#39;删除成功！&#39;</span><span class="p">,</span> <span class="s1">&#39;success&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">redirect_back</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="set_comment"><a class="viewcode-back" href="../../../blog.blueprints.html#blog.blueprints.admin.set_comment">[文档]</a><span class="nd">@admin_bp</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/set-comment/&lt;int:post_id&gt;&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+<span class="nd">@login_required</span>
+<span class="nd">@confirm_required</span>
+<span class="k">def</span> <span class="nf">set_comment</span><span class="p">(</span><span class="n">post_id</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        开启/关闭文章评论</span>
+<span class="sd">    :param post_id: 文章id</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">post</span> <span class="o">=</span> <span class="n">Post</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">get_or_404</span><span class="p">(</span><span class="n">post_id</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">post</span><span class="o">.</span><span class="n">can_comment</span><span class="p">:</span>
+        <span class="n">post</span><span class="o">.</span><span class="n">can_comment</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">flash</span><span class="p">(</span><span class="s1">&#39;关闭评论成功&#39;</span><span class="p">,</span> <span class="s1">&#39;info&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">post</span><span class="o">.</span><span class="n">can_comment</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">flash</span><span class="p">(</span><span class="s1">&#39;开启评论成功！&#39;</span><span class="p">,</span> <span class="s1">&#39;info&#39;</span><span class="p">)</span>
+
+    <span class="n">db</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">url_for</span><span class="p">(</span><span class="s1">&#39;blog.show_post&#39;</span><span class="p">,</span> <span class="n">post_id</span><span class="o">=</span><span class="n">post</span><span class="o">.</span><span class="n">id</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="delete_comment"><a class="viewcode-back" href="../../../blog.blueprints.html#blog.blueprints.admin.delete_comment">[文档]</a><span class="nd">@admin_bp</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/comment/&lt;int:comment_id&gt;/delete&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+<span class="nd">@login_required</span>
+<span class="nd">@confirm_required</span>
+<span class="k">def</span> <span class="nf">delete_comment</span><span class="p">(</span><span class="n">comment_id</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        删除评论</span>
+<span class="sd">    :param comment_id:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">comment</span> <span class="o">=</span> <span class="n">Comment</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">get_or_404</span><span class="p">(</span><span class="n">comment_id</span><span class="p">)</span>
+    <span class="n">db</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">comment</span><span class="p">)</span>
+    <span class="n">db</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+    <span class="n">flash</span><span class="p">(</span><span class="s1">&#39;删除评论成功！！&#39;</span><span class="p">,</span> <span class="s1">&#39;success&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">redirect_back</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="approve_comment"><a class="viewcode-back" href="../../../blog.blueprints.html#blog.blueprints.admin.approve_comment">[文档]</a><span class="nd">@admin_bp</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/comment/&lt;int:comment_id&gt;/approve&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+<span class="nd">@login_required</span>
+<span class="nd">@confirm_required</span>
+<span class="k">def</span> <span class="nf">approve_comment</span><span class="p">(</span><span class="n">comment_id</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        审核评论</span>
+<span class="sd">    :param comment_id:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">comment</span> <span class="o">=</span> <span class="n">Comment</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">get_or_404</span><span class="p">(</span><span class="n">comment_id</span><span class="p">)</span>
+    <span class="n">comment</span><span class="o">.</span><span class="n">reviewed</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="n">db</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+    <span class="n">flash</span><span class="p">(</span><span class="s1">&#39;评论审核通过&#39;</span><span class="p">,</span> <span class="s1">&#39;success&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">redirect_back</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="uploaded_files"><a class="viewcode-back" href="../../../blog.blueprints.html#blog.blueprints.admin.uploaded_files">[文档]</a><span class="nd">@admin_bp</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/files/&lt;path:filename&gt;&#39;</span><span class="p">)</span>
+<span class="nd">@login_required</span>
+<span class="nd">@confirm_required</span>
+<span class="k">def</span> <span class="nf">uploaded_files</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">current_app</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;UPLOADED_PATH&#39;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">send_from_directory</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="upload"><a class="viewcode-back" href="../../../blog.blueprints.html#blog.blueprints.admin.upload">[文档]</a><span class="nd">@admin_bp</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/upload&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+<span class="nd">@login_required</span>
+<span class="nd">@confirm_required</span>
+<span class="k">def</span> <span class="nf">upload</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        在集成富文本编辑器的时候，因为表单默认开启了CSRF保护，所以上传图片不会成功</span>
+<span class="sd">        需要配置CKEDITOR_ENABLE_CSRF = True来关闭CSRF验证，导致的400错误</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">file</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;upload&#39;</span><span class="p">)</span>  <span class="c1"># 获取上传的文件</span>
+    <span class="n">extension</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">filename</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>  <span class="c1"># 获取扩展名</span>
+    <span class="k">if</span> <span class="n">extension</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;jpg&#39;</span><span class="p">,</span> <span class="s1">&#39;gif&#39;</span><span class="p">,</span> <span class="s1">&#39;png&#39;</span><span class="p">,</span> <span class="s1">&#39;jpeg&#39;</span><span class="p">]:</span>  <span class="c1"># 验证文件类型示例</span>
+        <span class="k">return</span> <span class="n">upload_fail</span><span class="p">(</span><span class="n">message</span><span class="o">=</span><span class="s1">&#39;只能上传图片！&#39;</span><span class="p">)</span>
+    <span class="n">file</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">current_app</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;UPLOADED_PATH&#39;</span><span class="p">],</span> <span class="n">file</span><span class="o">.</span><span class="n">filename</span><span class="p">))</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="n">url_for</span><span class="p">(</span><span class="s1">&#39;admin_bp.uploaded_files&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="n">file</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">upload_success</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="upload_avatar"><a class="viewcode-back" href="../../../blog.blueprints.html#blog.blueprints.admin.upload_avatar">[文档]</a><span class="nd">@admin_bp</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/upload/avatar&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+<span class="nd">@login_required</span>
+<span class="nd">@confirm_required</span>
+<span class="k">def</span> <span class="nf">upload_avatar</span><span class="p">():</span>
+    <span class="n">form</span> <span class="o">=</span> <span class="n">UploadForm</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">form</span><span class="o">.</span><span class="n">validate_on_submit</span><span class="p">():</span>
+        <span class="n">image</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">random_filename</span><span class="p">(</span><span class="n">image</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+        <span class="n">base_with</span> <span class="o">=</span> <span class="n">current_app</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;AVATARS_PHOTO_SIZE&#39;</span><span class="p">]</span>
+        <span class="n">new_image</span> <span class="o">=</span> <span class="n">resize_avatar</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">base_with</span><span class="p">)</span>  <span class="c1"># 裁剪图片的尺寸</span>
+        <span class="n">new_image_s</span> <span class="o">=</span> <span class="n">resize_avatar</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="mi">80</span><span class="p">)</span>
+        <span class="n">new_image_l</span> <span class="o">=</span> <span class="n">resize_avatar</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="mi">110</span><span class="p">)</span>
+        <span class="n">user</span> <span class="o">=</span> <span class="n">current_user</span><span class="o">.</span><span class="n">_get_current_object</span><span class="p">()</span>  <span class="c1"># 获取代理的真实用户对象</span>
+        <span class="n">user</span><span class="o">.</span><span class="n">avatar_s</span> <span class="o">=</span> <span class="n">new_image_s</span>
+        <span class="n">user</span><span class="o">.</span><span class="n">avatar_m</span> <span class="o">=</span> <span class="n">new_image</span>
+        <span class="n">user</span><span class="o">.</span><span class="n">avatar_l</span> <span class="o">=</span> <span class="n">new_image_l</span>
+        <span class="n">commit_data</span><span class="p">(</span><span class="s1">&#39;add&#39;</span><span class="p">,</span> <span class="n">user</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;admin/upload_avatar.html&#39;</span><span class="p">,</span> <span class="n">form</span><span class="o">=</span><span class="n">form</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">blog</a></h1>
+
+
+
+
+
+
+
+
+<h3>导航</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">blog</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">模块代码</a><ul>
+  <li><a href="../../blog.html">blog</a><ul>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">快速搜索</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="转向" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, wangdong.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

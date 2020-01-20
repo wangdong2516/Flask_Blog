@@ -1,0 +1,237 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_cn">
+  <head>
+    <meta charset="utf-8" />
+    <title>blog.utils &#8212; blog 0.1 文档</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <script type="text/javascript" src="../../_static/translations.js"></script>
+    <link rel="index" title="索引" href="../../genindex.html" />
+    <link rel="search" title="搜索" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>blog.utils 源代码</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    存储各种辅助函数</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">urlparse</span> <span class="kn">import</span> <span class="n">urlparse</span><span class="p">,</span> <span class="n">urljoin</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">urllib.parse</span> <span class="kn">import</span> <span class="n">urlparse</span><span class="p">,</span> <span class="n">urljoin</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">wraps</span>
+<span class="kn">from</span> <span class="nn">PIL</span> <span class="kn">import</span> <span class="n">Image</span>
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">request</span>
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">redirect</span>
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">flash</span>
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">abort</span>
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">url_for</span><span class="p">,</span> <span class="n">current_app</span>
+<span class="kn">from</span> <span class="nn">blog.extensions</span> <span class="kn">import</span> <span class="n">db</span>
+<span class="kn">from</span> <span class="nn">itsdangerous</span> <span class="kn">import</span> <span class="n">TimedJSONWebSignatureSerializer</span> <span class="k">as</span> <span class="n">Serializer</span>  <span class="c1"># 生成签名</span>
+<span class="kn">from</span> <span class="nn">itsdangerous</span> <span class="kn">import</span> <span class="n">SignatureExpired</span><span class="p">,</span> <span class="n">BadSignature</span>
+
+<span class="kn">from</span> <span class="nn">flask_login</span> <span class="kn">import</span> <span class="n">current_user</span>
+
+
+<div class="viewcode-block" id="is_safe_url"><a class="viewcode-back" href="../../blog.html#blog.utils.is_safe_url">[文档]</a><span class="k">def</span> <span class="nf">is_safe_url</span><span class="p">(</span><span class="n">target</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        判断是否为安全的url</span>
+
+<span class="sd">        urlparse包的使用：</span>
+<span class="sd">            1。 作用解析url，将url解析为一个六元素的元祖</span>
+<span class="sd">                scheme: 使用的协议</span>
+<span class="sd">                netloc：主机地址</span>
+<span class="sd">                path：请求的路径</span>
+<span class="sd">                params：传递的参数</span>
+<span class="sd">                query: 查询字符串</span>
+<span class="sd">                fragment： 片段</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">host_url</span> <span class="o">=</span> <span class="n">urlparse</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">host_url</span><span class="p">)</span>
+    <span class="n">target_url</span> <span class="o">=</span> <span class="n">urlparse</span><span class="p">(</span><span class="n">urljoin</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">host_url</span><span class="p">,</span> <span class="n">target</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">target_url</span><span class="o">.</span><span class="n">scheme</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;http&#39;</span><span class="p">,</span> <span class="s1">&#39;https&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">host_url</span><span class="o">.</span><span class="n">netloc</span> <span class="o">==</span> <span class="n">target_url</span><span class="o">.</span><span class="n">netloc</span></div>
+
+
+<div class="viewcode-block" id="redirect_back"><a class="viewcode-back" href="../../blog.html#blog.utils.redirect_back">[文档]</a><span class="k">def</span> <span class="nf">redirect_back</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s1">&#39;blog.index&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;重定向到上一个页面&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;next&#39;</span><span class="p">),</span> <span class="n">request</span><span class="o">.</span><span class="n">referrer</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">target</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="k">if</span> <span class="n">is_safe_url</span><span class="p">(</span><span class="n">target</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">url_for</span><span class="p">(</span><span class="n">default</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="commit_data"><a class="viewcode-back" href="../../blog.html#blog.utils.commit_data">[文档]</a><span class="k">def</span> <span class="nf">commit_data</span><span class="p">(</span><span class="n">do</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        提交修改到数据库</span>
+<span class="sd">    :param do: 希望进行的操作 add 表示增加或者是更新</span>
+<span class="sd">    :param obj: 提交的数据对象</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">do</span> <span class="o">==</span> <span class="s1">&#39;add&#39;</span><span class="p">:</span>
+        <span class="n">db</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">db</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+    <span class="n">db</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="generate_confirmation_token"><a class="viewcode-back" href="../../blog.html#blog.utils.generate_confirmation_token">[文档]</a><span class="k">def</span> <span class="nf">generate_confirmation_token</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">op</span><span class="p">,</span> <span class="n">expiration</span><span class="o">=</span><span class="mi">3600</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;生成加密令牌&quot;&quot;&quot;</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">Serializer</span><span class="p">(</span><span class="n">current_app</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;SECRET_KEY&#39;</span><span class="p">],</span> <span class="n">expiration</span><span class="p">)</span>  <span class="c1"># 生成加密令牌并且指定令牌的有效期</span>
+
+    <span class="k">return</span> <span class="n">s</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span><span class="s1">&#39;confirm&#39;</span><span class="p">:</span> <span class="n">user</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="s1">&#39;operations&#39;</span><span class="p">:</span> <span class="n">op</span><span class="p">})</span>  <span class="c1"># 将用户id进行签名之后返回</span></div>
+
+
+<div class="viewcode-block" id="confirm_token"><a class="viewcode-back" href="../../blog.html#blog.utils.confirm_token">[文档]</a><span class="k">def</span> <span class="nf">confirm_token</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">token</span><span class="p">,</span> <span class="n">op</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        验证令牌的正确性和有效期</span>
+<span class="sd">    :param token: 加密之后的令牌值</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">s</span> <span class="o">=</span> <span class="n">Serializer</span><span class="p">(</span><span class="n">current_app</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;SECRET_KEY&#39;</span><span class="p">])</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
+    <span class="k">except</span> <span class="p">(</span><span class="n">BadSignature</span><span class="p">,</span> <span class="n">SignatureExpired</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;confirm&#39;</span><span class="p">)</span> <span class="o">!=</span> <span class="n">user</span><span class="o">.</span><span class="n">id</span> <span class="ow">or</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;operations&#39;</span><span class="p">)</span> <span class="o">!=</span> <span class="n">op</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="n">user</span><span class="o">.</span><span class="n">confirmed</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">commit_data</span><span class="p">(</span><span class="s1">&#39;add&#39;</span><span class="p">,</span> <span class="n">user</span><span class="p">)</span>
+    <span class="k">return</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="confirm_required"><a class="viewcode-back" href="../../blog.html#blog.utils.confirm_required">[文档]</a><span class="k">def</span> <span class="nf">confirm_required</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;验证用户是否确认账户的装饰器&quot;&quot;&quot;</span>
+
+    <span class="nd">@wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">confirm</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+       <span class="k">if</span> <span class="ow">not</span> <span class="n">current_user</span><span class="o">.</span><span class="n">confirmed</span><span class="p">:</span>
+           <span class="sd">&quot;&quot;&quot;如果当前用户未确认账户&quot;&quot;&quot;</span>
+           <span class="n">flash</span><span class="p">(</span><span class="s1">&#39;当前功能只针对验证邮箱的用户开放&#39;</span><span class="p">,</span> <span class="s1">&#39;warning&#39;</span><span class="p">)</span>
+           <span class="n">abort</span><span class="p">(</span><span class="mi">403</span><span class="p">)</span>
+       <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">confirm</span></div>
+
+
+<div class="viewcode-block" id="resize_avatar"><a class="viewcode-back" href="../../blog.html#blog.utils.resize_avatar">[文档]</a><span class="k">def</span> <span class="nf">resize_avatar</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">base_width</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;裁剪头像&quot;&quot;&quot;</span>
+    <span class="c1"># new_filename, ext = os.path.splitext(filename)</span>
+    <span class="n">new_image</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>  <span class="c1"># 打开一个图片</span>
+    <span class="n">width_precent</span> <span class="o">=</span> <span class="n">base_width</span> <span class="o">/</span> <span class="n">new_image</span><span class="o">.</span><span class="n">width</span>  <span class="c1"># 根据基本宽度确定需要缩小的百分比</span>
+
+    <span class="c1"># 如果大于1表示不需要裁剪</span>
+    <span class="k">if</span> <span class="n">width_precent</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">filename</span>
+
+    <span class="n">height</span> <span class="o">=</span> <span class="n">new_image</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">new_height</span> <span class="o">=</span> <span class="n">height</span> <span class="o">*</span> <span class="n">width_precent</span>
+    <span class="n">img</span> <span class="o">=</span> <span class="n">new_image</span><span class="o">.</span><span class="n">resize</span><span class="p">((</span><span class="n">base_width</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">new_height</span><span class="p">)),</span> <span class="n">Image</span><span class="o">.</span><span class="n">ANTIALIAS</span><span class="p">)</span>
+    <span class="n">img</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+        <span class="n">current_app</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;AVATARS_SAVE_PATH&#39;</span><span class="p">],</span> <span class="n">filename</span><span class="p">),</span>
+        <span class="n">optimize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">quality</span><span class="o">=</span><span class="mi">85</span>
+    <span class="p">)</span>  <span class="c1"># 保存图片，并且压缩图片的大小</span>
+    <span class="k">return</span> <span class="n">filename</span></div>
+
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">blog</a></h1>
+
+
+
+
+
+
+
+
+<h3>导航</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">blog</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">模块代码</a><ul>
+  <li><a href="../blog.html">blog</a><ul>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">快速搜索</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="转向" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, wangdong.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

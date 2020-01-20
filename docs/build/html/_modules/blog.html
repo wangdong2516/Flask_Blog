@@ -1,0 +1,412 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_cn">
+  <head>
+    <meta charset="utf-8" />
+    <title>blog &#8212; blog 0.1 文档</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <script type="text/javascript" src="../_static/translations.js"></script>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜索" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>blog 源代码</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    初始化操作</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">logging.handlers</span> <span class="kn">import</span> <span class="n">SMTPHandler</span><span class="p">,</span> <span class="n">RotatingFileHandler</span>
+
+<span class="kn">import</span> <span class="nn">click</span>
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">Flask</span><span class="p">,</span> <span class="n">render_template</span><span class="p">,</span> <span class="n">request</span>
+<span class="kn">from</span> <span class="nn">flask_login</span> <span class="kn">import</span> <span class="n">current_user</span>
+<span class="kn">from</span> <span class="nn">flask_sqlalchemy</span> <span class="kn">import</span> <span class="n">get_debug_queries</span>
+<span class="kn">from</span> <span class="nn">flask_wtf.csrf</span> <span class="kn">import</span> <span class="n">CSRFError</span>
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">url_for</span>
+<span class="kn">from</span> <span class="nn">celery</span> <span class="kn">import</span> <span class="n">Celery</span>
+
+<span class="kn">from</span> <span class="nn">blog.blueprints.admin</span> <span class="kn">import</span> <span class="n">admin_bp</span>
+<span class="kn">from</span> <span class="nn">blog.blueprints.auth</span> <span class="kn">import</span> <span class="n">auth_dp</span>
+<span class="kn">from</span> <span class="nn">blog.blueprints.blog</span> <span class="kn">import</span> <span class="n">blog_bp</span>
+<span class="kn">from</span> <span class="nn">blog.extensions</span> <span class="kn">import</span> <span class="n">bootstrap</span><span class="p">,</span> <span class="n">db</span><span class="p">,</span> <span class="n">login_manager</span>
+<span class="kn">from</span> <span class="nn">blog.extensions</span> <span class="kn">import</span> <span class="n">csrf</span><span class="p">,</span> <span class="n">ckeditor</span><span class="p">,</span> <span class="n">mail</span><span class="p">,</span> <span class="n">moment</span><span class="p">,</span> <span class="n">toolbar</span><span class="p">,</span> <span class="n">migrate</span><span class="p">,</span> <span class="n">avatars</span>
+<span class="kn">from</span> <span class="nn">blog.models</span> <span class="kn">import</span> <span class="n">Admin</span><span class="p">,</span> <span class="n">Post</span><span class="p">,</span> <span class="n">Category</span><span class="p">,</span> <span class="n">Comment</span><span class="p">,</span> <span class="n">Link</span>
+<span class="kn">from</span> <span class="nn">blog.settings</span> <span class="kn">import</span> <span class="n">config</span>
+
+<span class="n">basedir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)))</span>
+
+
+<div class="viewcode-block" id="create_app"><a class="viewcode-back" href="../blog.html#blog.create_app">[文档]</a><span class="k">def</span> <span class="nf">create_app</span><span class="p">(</span><span class="n">config_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">config_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">config_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;FLASK_CONFIG&#39;</span><span class="p">,</span> <span class="s1">&#39;development&#39;</span><span class="p">)</span>
+
+    <span class="n">app</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="s1">&#39;blog&#39;</span><span class="p">)</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">from_object</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="n">config_name</span><span class="p">])</span>
+    <span class="c1"># register_logging(app)</span>
+    <span class="n">register_extensions</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
+    <span class="n">register_blueprints</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
+    <span class="n">register_commands</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
+    <span class="n">register_errors</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
+    <span class="n">register_shell_context</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
+    <span class="n">register_template_context</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
+    <span class="n">register_request_handlers</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">url_map</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">app</span></div>
+
+
+<span class="c1"># def register_logging(app):</span>
+<span class="c1">#     &quot;&quot;&quot;注册日志记录&quot;&quot;&quot;</span>
+<span class="c1">#     class RequestFormatter(logging.Formatter):</span>
+<span class="c1">#</span>
+<span class="c1">#         def format(self, record):</span>
+<span class="c1">#             record.url = request.url</span>
+<span class="c1">#             record.remote_addr = request.remote_addr</span>
+<span class="c1">#             return super(RequestFormatter, self).format(record)</span>
+<span class="c1">#</span>
+<span class="c1">#     request_formatter = RequestFormatter(</span>
+<span class="c1">#         &#39;[%(asctime)s] %(remote_addr)s requested %(url)s\n&#39;</span>
+<span class="c1">#         &#39;%(levelname)s in %(module)s: %(message)s&#39;</span>
+<span class="c1">#     )</span>
+<span class="c1">#</span>
+<span class="c1">#     formatter = logging.Formatter(&#39;%(asctime)s - %(name)s - %(levelname)s - %(message)s&#39;)</span>
+<span class="c1">#</span>
+<span class="c1">#     file_handler = RotatingFileHandler(os.path.join(basedir, &#39;logs/bluelog.log&#39;),</span>
+<span class="c1">#                                        maxBytes=10 * 1024 * 1024, backupCount=10)</span>
+<span class="c1">#     file_handler.setFormatter(formatter)</span>
+<span class="c1">#     file_handler.setLevel(logging.INFO)</span>
+<span class="c1">#</span>
+<span class="c1">#     mail_handler = SMTPHandler(</span>
+<span class="c1">#         mailhost=app.config[&#39;MAIL_SERVER&#39;],</span>
+<span class="c1">#         fromaddr=app.config[&#39;MAIL_USERNAME&#39;],</span>
+<span class="c1">#         toaddrs=[&#39;ADMIN_EMAIL&#39;],</span>
+<span class="c1">#         subject=&#39;Bluelog Application Error&#39;,</span>
+<span class="c1">#         credentials=(app.config[&#39;MAIL_USERNAME&#39;], app.config[&#39;MAIL_PASSWORD&#39;]))</span>
+<span class="c1">#     mail_handler.setLevel(logging.ERROR)</span>
+<span class="c1">#     mail_handler.setFormatter(request_formatter)</span>
+<span class="c1">#</span>
+<span class="c1">#     if not app.debug:</span>
+<span class="c1">#         app.logger.addHandler(mail_handler)</span>
+<span class="c1">#         app.logger.addHandler(file_handler)</span>
+
+
+<div class="viewcode-block" id="register_shell_context"><a class="viewcode-back" href="../blog.html#blog.register_shell_context">[文档]</a><span class="k">def</span> <span class="nf">register_shell_context</span><span class="p">(</span><span class="n">app</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;注册shell执行环境&quot;&quot;&quot;</span>
+    <span class="nd">@app</span><span class="o">.</span><span class="n">shell_context_processor</span>
+    <span class="k">def</span> <span class="nf">make_shell_context</span><span class="p">():</span>
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">db</span><span class="o">=</span><span class="n">db</span><span class="p">,</span> <span class="n">Admin</span><span class="o">=</span><span class="n">Admin</span><span class="p">,</span> <span class="n">Post</span><span class="o">=</span><span class="n">Post</span><span class="p">,</span> <span class="n">Category</span><span class="o">=</span><span class="n">Category</span><span class="p">,</span> <span class="n">Comment</span><span class="o">=</span><span class="n">Comment</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="register_commands"><a class="viewcode-back" href="../blog.html#blog.register_commands">[文档]</a><span class="k">def</span> <span class="nf">register_commands</span><span class="p">(</span><span class="n">app</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;注册自定义命令&quot;&quot;&quot;</span>
+
+    <span class="nd">@app</span><span class="o">.</span><span class="n">cli</span><span class="o">.</span><span class="n">command</span><span class="p">()</span>
+    <span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s1">&#39;--drop&#39;</span><span class="p">,</span> <span class="n">is_flag</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Create after drop.&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">initdb</span><span class="p">(</span><span class="n">drop</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;初始化数据库&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">drop</span><span class="p">:</span>
+            <span class="n">click</span><span class="o">.</span><span class="n">confirm</span><span class="p">(</span><span class="s1">&#39;This operation will delete the database, do you want to continue?&#39;</span><span class="p">,</span> <span class="n">abort</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">db</span><span class="o">.</span><span class="n">drop_all</span><span class="p">()</span>
+            <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s1">&#39;Drop tables.&#39;</span><span class="p">)</span>
+        <span class="n">db</span><span class="o">.</span><span class="n">create_all</span><span class="p">()</span>
+        <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s1">&#39;Initialized database.....&#39;</span><span class="p">)</span>
+
+    <span class="nd">@app</span><span class="o">.</span><span class="n">cli</span><span class="o">.</span><span class="n">command</span><span class="p">()</span>
+    <span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s1">&#39;--username&#39;</span><span class="p">,</span> <span class="n">prompt</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="n">help</span><span class="o">=</span><span class="s1">&#39;The username used to login.&#39;</span><span class="p">)</span>
+    <span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
+        <span class="s1">&#39;--password&#39;</span><span class="p">,</span> <span class="n">prompt</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">hide_input</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">confirmation_prompt</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;The password used to login.&#39;</span>
+    <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">init</span><span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;初始化管理员用户&quot;&quot;&quot;</span>
+        <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s1">&#39;初始化数据库&gt;&gt;&gt;&#39;</span><span class="p">)</span>
+        <span class="n">db</span><span class="o">.</span><span class="n">create_all</span><span class="p">()</span>
+
+        <span class="n">admin</span> <span class="o">=</span> <span class="n">Admin</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">admin</span><span class="p">:</span>
+            <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s1">&#39;管理员已经存在，正在更新&gt;&gt;&gt;&gt;&#39;</span><span class="p">)</span>
+            <span class="n">admin</span><span class="o">.</span><span class="n">username</span> <span class="o">=</span> <span class="n">username</span>  <span class="c1"># 赋值用户名</span>
+            <span class="n">admin</span><span class="o">.</span><span class="n">set_password</span><span class="p">(</span><span class="n">password</span><span class="p">)</span>  <span class="c1"># 设置密码</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s1">&#39;管理员不存在，正在创建&gt;&gt;&gt;&gt;&#39;</span><span class="p">)</span>
+            <span class="n">admin</span> <span class="o">=</span> <span class="n">Admin</span><span class="p">(</span>
+                <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Admin&#39;</span><span class="p">,</span>
+                <span class="n">username</span><span class="o">=</span><span class="n">username</span><span class="p">,</span>
+                <span class="n">blog_title</span><span class="o">=</span><span class="s1">&#39;Bluelog&#39;</span><span class="p">,</span>
+                <span class="n">blog_sub_title</span><span class="o">=</span><span class="s2">&quot;I&#39;m the Best King James&quot;</span><span class="p">,</span>
+                <span class="n">about</span><span class="o">=</span><span class="s1">&#39;ABout her&#39;</span>
+            <span class="p">)</span>
+            <span class="n">admin</span><span class="o">.</span><span class="n">set_password</span><span class="p">(</span><span class="n">password</span><span class="p">)</span>
+            <span class="n">db</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">admin</span><span class="p">)</span>
+
+        <span class="n">category</span> <span class="o">=</span> <span class="n">Category</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">category</span><span class="p">:</span>
+            <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s1">&#39;文章分类还未创建，正在创建&gt;&gt;&gt;&gt;&#39;</span><span class="p">)</span>
+            <span class="n">category</span> <span class="o">=</span> <span class="n">Category</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Default&#39;</span><span class="p">)</span>
+            <span class="n">db</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">category</span><span class="p">)</span>
+
+        <span class="n">db</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+        <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s1">&#39;完成初始化&#39;</span><span class="p">)</span>
+
+    <span class="nd">@app</span><span class="o">.</span><span class="n">cli</span><span class="o">.</span><span class="n">command</span><span class="p">()</span>
+    <span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s1">&#39;--category&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;创建分类&#39;</span><span class="p">)</span>
+    <span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s1">&#39;--post&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;创建文章&#39;</span><span class="p">)</span>
+    <span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s1">&#39;--comment&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;创建评论&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">forge</span><span class="p">(</span><span class="n">category</span><span class="p">,</span> <span class="n">post</span><span class="p">,</span> <span class="n">comment</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            生成项目需要的虚拟数据</span>
+<span class="sd">        :param category: 分类名</span>
+<span class="sd">        :param post: 文章</span>
+<span class="sd">        :param comment: 评论</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="kn">from</span> <span class="nn">blog.fakes</span> <span class="kn">import</span> <span class="n">fake_admin</span><span class="p">,</span> <span class="n">fake_categories</span><span class="p">,</span> <span class="n">fake_posts</span><span class="p">,</span> <span class="n">fake_comments</span><span class="p">,</span> <span class="n">fake_links</span>
+
+        <span class="n">db</span><span class="o">.</span><span class="n">drop_all</span><span class="p">()</span>
+        <span class="n">db</span><span class="o">.</span><span class="n">create_all</span><span class="p">()</span>
+
+        <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s1">&#39;开始创建管理员用户&#39;</span><span class="p">)</span>
+        <span class="n">fake_admin</span><span class="p">()</span>
+
+        <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s1">&#39;开始创建分类&#39;</span><span class="p">)</span>
+        <span class="n">fake_categories</span><span class="p">(</span><span class="n">category</span><span class="p">)</span>
+
+        <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s1">&#39;开始创建文章&#39;</span><span class="p">)</span>
+        <span class="n">fake_posts</span><span class="p">(</span><span class="n">post</span><span class="p">)</span>
+
+        <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s1">&#39;开始创建评论&#39;</span><span class="p">)</span>
+        <span class="n">fake_comments</span><span class="p">(</span><span class="n">comment</span><span class="p">)</span>
+
+        <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s1">&#39;开始创建链接&#39;</span><span class="p">)</span>
+        <span class="n">fake_links</span><span class="p">()</span>
+
+        <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s1">&#39;虚拟数据创建完成&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="register_request_handlers"><a class="viewcode-back" href="../blog.html#blog.register_request_handlers">[文档]</a><span class="k">def</span> <span class="nf">register_request_handlers</span><span class="p">(</span><span class="n">app</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        注册请求处理函数</span>
+<span class="sd">            1。 请求钩子的作用就是进行一些额外的处理</span>
+<span class="sd">            2。 使用蓝图对象注册的请求钩子，只会被蓝图对象的路由触发，可以在蓝图对象中注册全局的请求处理函数</span>
+<span class="sd">                使用@蓝图对象.before_app_request,after_app_request</span>
+<span class="sd">            3. @app.before_request注册的请求钩子可以注册全局的请求处理函数</span>
+<span class="sd">    :param app:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nd">@app</span><span class="o">.</span><span class="n">after_request</span>
+    <span class="k">def</span> <span class="nf">query_profiler</span><span class="p">(</span><span class="n">response</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">get_debug_queries</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">q</span><span class="o">.</span><span class="n">duration</span> <span class="o">&gt;=</span> <span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;BLUELOG_SLOW_QUERY_THRESHOLD&#39;</span><span class="p">]:</span>
+                <span class="n">app</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="s1">&#39;Slow query: Duration: </span><span class="si">%f</span><span class="s1">s</span><span class="se">\n</span><span class="s1"> Context: </span><span class="si">%s</span><span class="se">\n</span><span class="s1">Query: </span><span class="si">%s</span><span class="se">\n</span><span class="s1"> &#39;</span>
+                    <span class="o">%</span> <span class="p">(</span><span class="n">q</span><span class="o">.</span><span class="n">duration</span><span class="p">,</span> <span class="n">q</span><span class="o">.</span><span class="n">context</span><span class="p">,</span> <span class="n">q</span><span class="o">.</span><span class="n">statement</span><span class="p">)</span>
+                <span class="p">)</span>
+        <span class="k">return</span> <span class="n">response</span></div>
+
+
+<div class="viewcode-block" id="register_template_context"><a class="viewcode-back" href="../blog.html#blog.register_template_context">[文档]</a><span class="k">def</span> <span class="nf">register_template_context</span><span class="p">(</span><span class="n">app</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        注册模板上下文处理函数</span>
+<span class="sd">        1。 蓝图对象可以使用app.context_processor装饰器为模板注册模板上下文处理函数，模板上下文处理函数的作用就是</span>
+<span class="sd">            为模板添加一些在模板中需要使用的变量，这样可以避免每次显示的传入模板</span>
+<span class="sd">        2。 同样的，使用蓝图对象注册的模板上下文，只可以在特有的蓝图模板中使用，也可以使用蓝图对象.app_context_processor</span>
+<span class="sd">            注册全局的模板上下文处理函数</span>
+<span class="sd">        3。 蓝图对象也可以使用app_template_global(), app_template_filter(), app_template_test()装饰器，用来注册</span>
+<span class="sd">            全局的模板全局函数，模板过滤器和模板测试器</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@app</span><span class="o">.</span><span class="n">context_processor</span>
+    <span class="k">def</span> <span class="nf">make_template_context</span><span class="p">():</span>
+        <span class="n">admin</span> <span class="o">=</span> <span class="n">Admin</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+        <span class="n">categories</span> <span class="o">=</span> <span class="n">Category</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="n">Category</span><span class="o">.</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+        <span class="n">links</span> <span class="o">=</span> <span class="n">Link</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="n">Link</span><span class="o">.</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">current_user</span><span class="o">.</span><span class="n">is_authenticated</span><span class="p">:</span>
+            <span class="c1"># current_user.is_authenticated是flask_login提供的，当用户登陆认证成功之后，返回True</span>
+            <span class="n">unread_comments</span> <span class="o">=</span> <span class="n">Comment</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">reviewed</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">unread_comments</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">admin</span><span class="o">=</span><span class="n">admin</span><span class="p">,</span> <span class="n">categories</span><span class="o">=</span><span class="n">categories</span><span class="p">,</span>
+            <span class="n">links</span><span class="o">=</span><span class="n">links</span><span class="p">,</span> <span class="n">unread_comments</span><span class="o">=</span><span class="n">unread_comments</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="register_errors"><a class="viewcode-back" href="../blog.html#blog.register_errors">[文档]</a><span class="k">def</span> <span class="nf">register_errors</span><span class="p">(</span><span class="n">app</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        注册错误处理函数</span>
+<span class="sd">        注意：</span>
+<span class="sd">            1。 使用蓝图对象.errorhandler装饰器注册的错误处理函数，只能捕捉访问蓝图对象中的路由时发生的错误</span>
+<span class="sd">            2。 使用蓝图对象的app_errorhandler装饰器可以注册一个全局的错误处理函数</span>
+<span class="sd">            3。 404和405错误仅会被全局的错误处理函数所捕捉，如果想区分错误是否来自视图函数，可以根据request.path.startswith()来判断</span>
+<span class="sd">            4。 app.errorhandler()接受错误状态码作为参数，表示捕捉指定的错误</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@app</span><span class="o">.</span><span class="n">errorhandler</span><span class="p">(</span><span class="mi">400</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">error_400</span><span class="p">(</span><span class="n">e</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;自定义400错误的处理&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;errors/400.html&#39;</span><span class="p">)</span>
+
+    <span class="nd">@app</span><span class="o">.</span><span class="n">errorhandler</span><span class="p">(</span><span class="mi">403</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">error_403</span><span class="p">(</span><span class="n">e</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;403错误处理&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;errors/403.html&#39;</span><span class="p">)</span>
+
+    <span class="nd">@app</span><span class="o">.</span><span class="n">errorhandler</span><span class="p">(</span><span class="mi">404</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">error_404</span><span class="p">(</span><span class="n">e</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;自定义404错误的处理&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;errors/404.html&#39;</span><span class="p">,</span> <span class="n">url_for</span><span class="o">=</span><span class="n">url_for</span><span class="p">)</span>
+
+    <span class="nd">@app</span><span class="o">.</span><span class="n">errorhandler</span><span class="p">(</span><span class="mi">500</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">error_500</span><span class="p">(</span><span class="n">e</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;errors/500.html&#39;</span><span class="p">)</span>
+
+    <span class="nd">@app</span><span class="o">.</span><span class="n">errorhandler</span><span class="p">(</span><span class="n">CSRFError</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">handle_csrf_error</span><span class="p">(</span><span class="n">e</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;自定义csrf验证错误&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;errors/400.html&#39;</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;会话过期或者失效&#39;</span><span class="p">),</span> <span class="mi">400</span></div>
+
+
+<div class="viewcode-block" id="register_extensions"><a class="viewcode-back" href="../blog.html#blog.register_extensions">[文档]</a><span class="k">def</span> <span class="nf">register_extensions</span><span class="p">(</span><span class="n">app</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;初始化一系列的扩展&quot;&quot;&quot;</span>
+    <span class="n">bootstrap</span><span class="o">.</span><span class="n">init_app</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>  <span class="c1"># Bootstarp扩展</span>
+    <span class="n">db</span><span class="o">.</span><span class="n">init_app</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>  <span class="c1"># salalchemy扩展</span>
+    <span class="n">ckeditor</span><span class="o">.</span><span class="n">init_app</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>  <span class="c1"># 富文本编辑器扩展</span>
+    <span class="n">csrf</span><span class="o">.</span><span class="n">init_app</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>  <span class="c1"># csrf扩展</span>
+    <span class="n">login_manager</span><span class="o">.</span><span class="n">init_app</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>  <span class="c1"># flask_login扩展</span>
+    <span class="n">mail</span><span class="o">.</span><span class="n">init_app</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>  <span class="c1"># 电子邮件扩展</span>
+    <span class="n">moment</span><span class="o">.</span><span class="n">init_app</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>  <span class="c1"># flask_moment本地化时间扩展</span>
+    <span class="n">toolbar</span><span class="o">.</span><span class="n">init_app</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>  <span class="c1"># 调试工具扩展</span>
+    <span class="n">migrate</span><span class="o">.</span><span class="n">init_app</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">db</span><span class="p">)</span>  <span class="c1"># 数据库迁移扩展,必须传递db作为第二个参数</span>
+    <span class="n">avatars</span><span class="o">.</span><span class="n">init_app</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>  <span class="c1"># 头像</span></div>
+
+
+<div class="viewcode-block" id="register_blueprints"><a class="viewcode-back" href="../blog.html#blog.register_blueprints">[文档]</a><span class="k">def</span> <span class="nf">register_blueprints</span><span class="p">(</span><span class="n">app</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;注册蓝图对象的函数</span>
+
+<span class="sd">        蓝图使用app.register_blueprint()方法进行注册，必须传入的参数是创建的蓝图对象，其他的参数是用来控制蓝图的行为</span>
+<span class="sd">        比如使用url_prefix参数为蓝图下的所有视图url附加一个url前缀</span>
+<span class="sd">        此时蓝图下的视图url都会增加一个/auth前缀</span>
+<span class="sd">        使用subdomain参数可以为蓝图下的路由设置子域名</span>
+<span class="sd">            app.register_blueprint(auth_dp, url_prefix=&#39;/auth&#39;, subdomain=&#39;auth&#39;)</span>
+
+<span class="sd">        端点作为url规则和视图函数的中间媒介</span>
+<span class="sd">        使用app.route()可以给视图函数注册一个路由，使用app.add_url_rule()方法同样也可以注册路由</span>
+
+<span class="sd">        app.add_url_rule(rule, endpoint, view_func) 的第二个参数指定端点，第三个参数是视图函数对象</span>
+<span class="sd">        在路由中，url规则和视图函数不是直接映射的，而是通过端点作为中间媒介</span>
+<span class="sd">        不直接映射url和视图函数，原因是使用端点可以实现蓝图中的视图函数的命名空间</span>
+
+<span class="sd">        一旦使用蓝图，我们就要对url_for()函数中的端点值进行修改，添加蓝图实例名来明确端点的归属</span>
+<span class="sd">        端点也有一种简写的方式，在蓝图内部可以使用.视图函数的形式来省略蓝图的名称，但是在全局环境中，必须使用完整的名称</span>
+
+<span class="sd">        使用蓝图可以避免端点值的重复冲突，但是路由的url规则还是会产生重复，当两个蓝图中有相同的url规则的时候，</span>
+<span class="sd">        请求只会分配到第一个注册的蓝图对象上，我们可以通过使用url_prefix参数指定前缀的方式解决</span>
+
+<span class="sd">        要使用蓝图独有的静态文件，需要在定义蓝图的时候，使用static_folder参数指定蓝图静态文件夹的位置</span>
+<span class="sd">        参数值可以是绝对路径或者是相对路径，另外，因为蓝图内置的static路由和程序实例的static路由是相同的，</span>
+<span class="sd">        我们需要使用static_url_path参数为蓝图对象指定新的静态文件路由,如果在创建蓝图对象的时候，制定了url</span>
+<span class="sd">        前缀的话，这里static_url_path会自动变为/前缀/static</span>
+<span class="sd">            auth_dp = Blueprint(&#39;auth&#39;, __name__, static_floder=&#39;static&#39;, static_url_path=&#39;auth/static&#39;)</span>
+<span class="sd">        在生成用来获取蓝图静态文件的url的时候，需要写出完整的端点</span>
+
+<span class="sd">        当蓝图中包含独特的模板文件夹的时候，在实例化蓝图对象的时候，使用tempalte_folder参数指定模板文件夹的位置</span>
+
+
+
+<span class="sd">        默认情况下，端点是视图函数名称，我们也可以使用endpoint参数改变</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">register_blueprint</span><span class="p">(</span><span class="n">blog_bp</span><span class="p">)</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">register_blueprint</span><span class="p">(</span><span class="n">admin_bp</span><span class="p">,</span> <span class="n">url_prefix</span><span class="o">=</span><span class="s1">&#39;/admin&#39;</span><span class="p">)</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">register_blueprint</span><span class="p">(</span><span class="n">auth_dp</span><span class="p">,</span> <span class="n">url_prefix</span><span class="o">=</span><span class="s1">&#39;/auth&#39;</span><span class="p">)</span>  <span class="c1"># 注册蓝图给程序实例app</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">blog</a></h1>
+
+
+
+
+
+
+
+
+<h3>导航</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">blog</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">模块代码</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">快速搜索</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="转向" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, wangdong.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

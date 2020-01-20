@@ -1,0 +1,239 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_cn">
+  <head>
+    <meta charset="utf-8" />
+    <title>blog.fakes &#8212; blog 0.1 文档</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <script type="text/javascript" src="../../_static/translations.js"></script>
+    <link rel="index" title="索引" href="../../genindex.html" />
+    <link rel="search" title="搜索" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>blog.fakes 源代码</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    存储虚拟数据生成函数，生成虚拟数据</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">random</span>
+
+<span class="kn">from</span> <span class="nn">faker</span> <span class="kn">import</span> <span class="n">Faker</span>
+
+<span class="kn">from</span> <span class="nn">blog.models</span> <span class="kn">import</span> <span class="n">Admin</span><span class="p">,</span> <span class="n">Post</span><span class="p">,</span> <span class="n">Comment</span><span class="p">,</span> <span class="n">Category</span><span class="p">,</span> <span class="n">Link</span>
+<span class="kn">from</span> <span class="nn">blog.extensions</span> <span class="kn">import</span> <span class="n">db</span>
+<span class="n">faker</span> <span class="o">=</span> <span class="n">Faker</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="fake_admin"><a class="viewcode-back" href="../../blog.html#blog.fakes.fake_admin">[文档]</a><span class="k">def</span> <span class="nf">fake_admin</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        生成管理员的虚拟数据</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">admin</span> <span class="o">=</span> <span class="n">Admin</span><span class="p">(</span>
+        <span class="n">username</span><span class="o">=</span><span class="s1">&#39;admin&#39;</span><span class="p">,</span>
+        <span class="n">blog_title</span><span class="o">=</span><span class="s1">&#39;Bluelog&#39;</span><span class="p">,</span>
+        <span class="n">blog_sub_title</span><span class="o">=</span><span class="s1">&#39;I&quot;m The Best King James&#39;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;King James&#39;</span><span class="p">,</span>
+        <span class="n">about</span><span class="o">=</span><span class="s1">&#39;I Am The Best&#39;</span>
+    <span class="p">)</span>
+    <span class="n">admin</span><span class="o">.</span><span class="n">set_password</span><span class="p">(</span><span class="s1">&#39;wangdong&#39;</span><span class="p">)</span>
+    <span class="n">db</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">admin</span><span class="p">)</span>
+    <span class="n">db</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="fake_categories"><a class="viewcode-back" href="../../blog.html#blog.fakes.fake_categories">[文档]</a><span class="k">def</span> <span class="nf">fake_categories</span><span class="p">(</span><span class="n">count</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        生成分类虚拟数据</span>
+<span class="sd">    :param count: 数量</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">category</span> <span class="o">=</span> <span class="n">Category</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Default&#39;</span><span class="p">)</span>  <span class="c1"># 首先创建一个默认分类</span>
+    <span class="n">db</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">category</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">count</span><span class="p">):</span>
+        <span class="n">category</span> <span class="o">=</span> <span class="n">Category</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">faker</span><span class="o">.</span><span class="n">word</span><span class="p">())</span>
+        <span class="n">db</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">category</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">db</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">db</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">rollback</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="fake_posts"><a class="viewcode-back" href="../../blog.html#blog.fakes.fake_posts">[文档]</a><span class="k">def</span> <span class="nf">fake_posts</span><span class="p">(</span><span class="n">count</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        生成文章虚拟数据</span>
+<span class="sd">    :param count: 数量，通过命令行执指定或者使用默认值50</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">count</span><span class="p">):</span>
+        <span class="n">post</span> <span class="o">=</span> <span class="n">Post</span><span class="p">(</span>
+            <span class="n">title</span><span class="o">=</span><span class="n">faker</span><span class="o">.</span><span class="n">sentence</span><span class="p">()[:</span><span class="mi">60</span><span class="p">],</span>
+            <span class="n">body</span><span class="o">=</span><span class="n">faker</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mi">200</span><span class="p">),</span>
+            <span class="n">category</span><span class="o">=</span><span class="n">Category</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">Category</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">count</span><span class="p">())),</span>
+            <span class="n">timestamp</span><span class="o">=</span><span class="n">faker</span><span class="o">.</span><span class="n">date_time_this_year</span><span class="p">()</span>
+        <span class="p">)</span>
+        <span class="n">db</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">post</span><span class="p">)</span>
+    <span class="n">db</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="fake_comments"><a class="viewcode-back" href="../../blog.html#blog.fakes.fake_comments">[文档]</a><span class="k">def</span> <span class="nf">fake_comments</span><span class="p">(</span><span class="n">count</span><span class="o">=</span><span class="mi">500</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        生成虚拟评论数据</span>
+<span class="sd">    :param count: 评论的数据，没有指定使用默认值500</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">count</span><span class="p">):</span>
+        <span class="n">comment</span> <span class="o">=</span> <span class="n">Comment</span><span class="p">(</span>
+            <span class="n">author</span><span class="o">=</span><span class="n">faker</span><span class="o">.</span><span class="n">name</span><span class="p">(),</span>
+            <span class="n">email</span><span class="o">=</span><span class="n">faker</span><span class="o">.</span><span class="n">email</span><span class="p">(),</span>
+            <span class="n">site</span><span class="o">=</span><span class="n">faker</span><span class="o">.</span><span class="n">url</span><span class="p">(),</span>
+            <span class="n">body</span><span class="o">=</span><span class="n">faker</span><span class="o">.</span><span class="n">sentence</span><span class="p">(),</span>
+            <span class="n">timestamp</span><span class="o">=</span><span class="n">faker</span><span class="o">.</span><span class="n">date_time_this_year</span><span class="p">(),</span>
+            <span class="n">reviewed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">post</span><span class="o">=</span><span class="n">Post</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">Post</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">count</span><span class="p">()))</span>
+        <span class="p">)</span>
+
+        <span class="n">db</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">comment</span><span class="p">)</span>
+
+    <span class="n">salt</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">count</span> <span class="o">*</span> <span class="mf">0.1</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">salt</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;创建未回复的评论&quot;&quot;&quot;</span>
+        <span class="n">comment</span> <span class="o">=</span> <span class="n">Comment</span><span class="p">(</span>
+            <span class="n">author</span><span class="o">=</span><span class="n">faker</span><span class="o">.</span><span class="n">name</span><span class="p">(),</span>
+            <span class="n">email</span><span class="o">=</span><span class="n">faker</span><span class="o">.</span><span class="n">email</span><span class="p">(),</span>
+            <span class="n">site</span><span class="o">=</span><span class="n">faker</span><span class="o">.</span><span class="n">url</span><span class="p">(),</span>
+            <span class="n">body</span><span class="o">=</span><span class="n">faker</span><span class="o">.</span><span class="n">sentence</span><span class="p">(),</span>
+            <span class="n">timestamp</span><span class="o">=</span><span class="n">faker</span><span class="o">.</span><span class="n">date_time_this_year</span><span class="p">(),</span>
+            <span class="n">reviewed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">post</span><span class="o">=</span><span class="n">Post</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">Post</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">count</span><span class="p">()))</span>
+        <span class="p">)</span>
+        <span class="n">db</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">comment</span><span class="p">)</span>
+
+        <span class="n">comment</span> <span class="o">=</span> <span class="n">Comment</span><span class="p">(</span>
+            <span class="n">author</span><span class="o">=</span><span class="s1">&#39;Mima Kirigoe&#39;</span><span class="p">,</span>
+            <span class="n">email</span><span class="o">=</span><span class="s1">&#39;mima@example.com&#39;</span><span class="p">,</span>
+            <span class="n">site</span><span class="o">=</span><span class="s1">&#39;example.com&#39;</span><span class="p">,</span>
+            <span class="n">body</span><span class="o">=</span><span class="n">faker</span><span class="o">.</span><span class="n">sentence</span><span class="p">(),</span>
+            <span class="n">timestamp</span><span class="o">=</span><span class="n">faker</span><span class="o">.</span><span class="n">date_time_this_year</span><span class="p">(),</span>
+            <span class="n">from_admin</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">reviewed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">post</span><span class="o">=</span><span class="n">Post</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">Post</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">count</span><span class="p">()))</span>
+        <span class="p">)</span>
+        <span class="n">db</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">comment</span><span class="p">)</span>
+    <span class="n">db</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">salt</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;创建回复的评论&quot;&quot;&quot;</span>
+        <span class="n">comment</span> <span class="o">=</span> <span class="n">Comment</span><span class="p">(</span>
+            <span class="n">author</span><span class="o">=</span><span class="n">faker</span><span class="o">.</span><span class="n">name</span><span class="p">(),</span>
+            <span class="n">email</span><span class="o">=</span><span class="n">faker</span><span class="o">.</span><span class="n">email</span><span class="p">(),</span>
+            <span class="n">site</span><span class="o">=</span><span class="n">faker</span><span class="o">.</span><span class="n">url</span><span class="p">(),</span>
+            <span class="n">body</span><span class="o">=</span><span class="n">faker</span><span class="o">.</span><span class="n">sentence</span><span class="p">(),</span>
+            <span class="n">timestamp</span><span class="o">=</span><span class="n">faker</span><span class="o">.</span><span class="n">date_time_this_year</span><span class="p">(),</span>
+            <span class="n">reviewed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">replies</span><span class="o">=</span><span class="n">Comment</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">Post</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">count</span><span class="p">())),</span>
+            <span class="n">post</span><span class="o">=</span><span class="n">Post</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">Post</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">count</span><span class="p">()))</span>
+        <span class="p">)</span>
+        <span class="n">db</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">comment</span><span class="p">)</span>
+    <span class="n">db</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="fake_links"><a class="viewcode-back" href="../../blog.html#blog.fakes.fake_links">[文档]</a><span class="k">def</span> <span class="nf">fake_links</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;生成虚拟链接数据&quot;&quot;&quot;</span>
+    <span class="n">twitter</span> <span class="o">=</span> <span class="n">Link</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Twitter&#39;</span><span class="p">,</span> <span class="n">url</span><span class="o">=</span><span class="s1">&#39;#&#39;</span><span class="p">)</span>
+    <span class="n">facebook</span> <span class="o">=</span> <span class="n">Link</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Facebook&#39;</span><span class="p">,</span> <span class="n">url</span><span class="o">=</span><span class="s1">&#39;#&#39;</span><span class="p">)</span>
+    <span class="n">linkedin</span> <span class="o">=</span> <span class="n">Link</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;LinkedIn&#39;</span><span class="p">,</span> <span class="n">url</span><span class="o">=</span><span class="s1">&#39;#&#39;</span><span class="p">)</span>
+    <span class="n">google</span> <span class="o">=</span> <span class="n">Link</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Google+&#39;</span><span class="p">,</span> <span class="n">url</span><span class="o">=</span><span class="s1">&#39;#&#39;</span><span class="p">)</span>
+    <span class="n">db</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">add_all</span><span class="p">([</span><span class="n">twitter</span><span class="p">,</span> <span class="n">facebook</span><span class="p">,</span> <span class="n">linkedin</span><span class="p">,</span> <span class="n">google</span><span class="p">])</span>
+    <span class="n">db</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">blog</a></h1>
+
+
+
+
+
+
+
+
+<h3>导航</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">blog</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">模块代码</a><ul>
+  <li><a href="../blog.html">blog</a><ul>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">快速搜索</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="转向" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, wangdong.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

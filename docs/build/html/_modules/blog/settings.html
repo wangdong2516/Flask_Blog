@@ -1,0 +1,184 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_cn">
+  <head>
+    <meta charset="utf-8" />
+    <title>blog.settings &#8212; blog 0.1 文档</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <script type="text/javascript" src="../../_static/translations.js"></script>
+    <link rel="index" title="索引" href="../../genindex.html" />
+    <link rel="search" title="搜索" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>blog.settings 源代码</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;项目的配置文件&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">dotenv</span> <span class="kn">import</span> <span class="n">load_dotenv</span>
+<span class="n">load_dotenv</span><span class="p">()</span>
+<span class="c1"># 项目的基本目录</span>
+<span class="n">basedir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)))</span>
+
+
+<div class="viewcode-block" id="BaseConfig"><a class="viewcode-back" href="../../blog.html#blog.settings.BaseConfig">[文档]</a><span class="k">class</span> <span class="nc">BaseConfig</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        基本配置类</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">SECRET_KEY</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;SECRET_KEY&#39;</span><span class="p">,</span> <span class="s1">&#39;secret string&#39;</span><span class="p">)</span>  <span class="c1"># 项目密钥</span>
+
+    <span class="n">SQLALCHEMY_TRACK_MODIFICATIONS</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># 自动追踪修改</span>
+
+    <span class="n">MAIL_SERVER</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;MAIL_SERVER&#39;</span><span class="p">)</span>  <span class="c1"># 电子邮件服务器</span>
+    <span class="n">MAIL_PORT</span> <span class="o">=</span> <span class="mi">465</span>  <span class="c1"># 发信端口</span>
+    <span class="n">MAIL_USE_SSL</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># 是否使用SSL/TLS</span>
+    <span class="n">MAIL_USE_TLS</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># 是否使用STARTTLS  163邮箱不支持</span>
+    <span class="n">MAIL_USERNAME</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;MAIL_USERNAME&#39;</span><span class="p">)</span>  <span class="c1"># 发信服务器的用户名</span>
+    <span class="n">MAIL_PASSWORD</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;MAIL_PASSWORD&#39;</span><span class="p">)</span>  <span class="c1"># 发信服务器的密码</span>
+    <span class="n">MAIL_DEFAULT_SENDER</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;FlaskBlog Admin&#39;</span><span class="p">,</span> <span class="n">MAIL_USERNAME</span><span class="p">)</span>  <span class="c1"># 默认发件人(用户名， 地址)</span>
+
+    <span class="n">BLUELOG_EMAIL</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;BLUELOG_EMAIL&#39;</span><span class="p">)</span>  <span class="c1"># 博客邮件</span>
+    <span class="n">BLUELOG_POST_PER_PAGE</span> <span class="o">=</span> <span class="mi">10</span>  <span class="c1"># 博客页面每页的个数，使用环境变量配置可以实现动态修改</span>
+    <span class="n">BLUELOG_MANAGE_POST_PER_PAGE</span> <span class="o">=</span> <span class="mi">15</span>  <span class="c1"># 管理后台的每页的个数</span>
+    <span class="n">BLUELOG_COMMENT_PER_PAGE</span> <span class="o">=</span> <span class="mi">15</span>  <span class="c1"># 评论数</span>
+
+    <span class="c1"># bootstarp主体样式配置  主体名称：显示名称</span>
+    <span class="n">BLUELOG_THEMES</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;perfect_blue&#39;</span><span class="p">:</span> <span class="s1">&#39;Perfect Blue&#39;</span><span class="p">,</span> <span class="s1">&#39;black_swan&#39;</span><span class="p">:</span> <span class="s1">&#39;Black Swan&#39;</span><span class="p">}</span>
+    <span class="n">BLUELOG_SLOW_QUERY_THRESHOLD</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="n">BLUELOG_UPLOAD_PATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">basedir</span><span class="p">,</span> <span class="s1">&#39;uploads&#39;</span><span class="p">)</span>
+    <span class="n">BLUELOG_ALLOWED_IMAGE_EXTENSIONS</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;png&#39;</span><span class="p">,</span> <span class="s1">&#39;jpg&#39;</span><span class="p">,</span> <span class="s1">&#39;jpeg&#39;</span><span class="p">,</span> <span class="s1">&#39;gif&#39;</span><span class="p">]</span>
+    <span class="n">CKEDITOR_FILE_UPLOADER</span> <span class="o">=</span> <span class="s1">&#39;admin_bp.upload&#39;</span>  <span class="c1"># 指定编辑器上传文件的处理函数</span>
+    <span class="c1"># CKEDITOR_SERVE_LOCAL = True</span>
+    <span class="n">CKEDITOR_ENABLE_CSRF</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># 配置富文本编辑器禁用CSRF</span>
+    <span class="n">UPLOADED_PATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">basedir</span><span class="p">,</span> <span class="s1">&#39;uploads&#39;</span><span class="p">)</span>  <span class="c1"># 指定上传文件的保存路径</span>
+
+    <span class="c1"># avatars扩展的配置</span>
+    <span class="n">AVATARS_SAVE_PATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">UPLOADED_PATH</span><span class="p">,</span> <span class="s1">&#39;avatars&#39;</span><span class="p">)</span>  <span class="c1"># 配置头像的存储路径</span>
+    <span class="n">AVATARS_SIZE_TUPLE</span> <span class="o">=</span> <span class="p">(</span><span class="mi">30</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>  <span class="c1"># 配置三种尺寸的头像大小，必须为一个三元素的元祖</span>
+    <span class="n">AVATARS_PHOTO_SIZE</span> <span class="o">=</span> <span class="mi">100</span></div>
+
+
+<div class="viewcode-block" id="DevelopmentConfig"><a class="viewcode-back" href="../../blog.html#blog.settings.DevelopmentConfig">[文档]</a><span class="k">class</span> <span class="nc">DevelopmentConfig</span><span class="p">(</span><span class="n">BaseConfig</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;开发环境配置&quot;&quot;&quot;</span>
+
+    <span class="n">SQLALCHEMY_DATABASE_URI</span> <span class="o">=</span> <span class="s1">&#39;mysql://root:wang1277@localhost/flask&#39;</span></div>
+
+
+<div class="viewcode-block" id="TestingConfig"><a class="viewcode-back" href="../../blog.html#blog.settings.TestingConfig">[文档]</a><span class="k">class</span> <span class="nc">TestingConfig</span><span class="p">(</span><span class="n">BaseConfig</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;测试环境配置&quot;&quot;&quot;</span>
+
+    <span class="n">TESTING</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">WTF_CSRF_ENABLED</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">SQLALCHEMY_DATABASE_URI</span> <span class="o">=</span> <span class="s1">&#39;mysql://root:wang1277@host/Test&#39;</span></div>
+
+
+<div class="viewcode-block" id="ProductionConfig"><a class="viewcode-back" href="../../blog.html#blog.settings.ProductionConfig">[文档]</a><span class="k">class</span> <span class="nc">ProductionConfig</span><span class="p">(</span><span class="n">BaseConfig</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;生产环境配置&quot;&quot;&quot;</span>
+
+    <span class="n">SQLALCHEMY_DATABASE_URI</span> <span class="o">=</span> <span class="s1">&#39;mysql://root:wang1277@127.0.0.1:3307/flask&#39;</span></div>
+
+
+<span class="c1"># 建立配置类的映射，用于在创建程序实例的时候通过配置的名称创建对应的配置类，创建程序实例之后，使用app.config.from_object()</span>
+<span class="c1"># 从对象中加载配置</span>
+
+<span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;development&#39;</span><span class="p">:</span> <span class="n">DevelopmentConfig</span><span class="p">,</span>
+    <span class="s1">&#39;testing&#39;</span><span class="p">:</span> <span class="n">TestingConfig</span><span class="p">,</span>
+    <span class="s1">&#39;production&#39;</span><span class="p">:</span> <span class="n">ProductionConfig</span>
+<span class="p">}</span>
+
+<span class="c1"># 存储一些通用的操作</span>
+<div class="viewcode-block" id="Operations"><a class="viewcode-back" href="../../blog.html#blog.settings.Operations">[文档]</a><span class="k">class</span> <span class="nc">Operations</span><span class="p">:</span>
+
+    <span class="n">CONFIRM</span>  <span class="o">=</span> <span class="s1">&#39;confirm&#39;</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">blog</a></h1>
+
+
+
+
+
+
+
+
+<h3>导航</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">blog</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">模块代码</a><ul>
+  <li><a href="../blog.html">blog</a><ul>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">快速搜索</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="转向" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, wangdong.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

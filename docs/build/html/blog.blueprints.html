@@ -1,0 +1,661 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_cn">
+  <head>
+    <meta charset="utf-8" />
+    <title>blog.blueprints package &#8212; blog 0.1 文档</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <script type="text/javascript" src="_static/translations.js"></script>
+    <link rel="index" title="索引" href="genindex.html" />
+    <link rel="search" title="搜索" href="search.html" />
+    <link rel="next" title="blog.celery_tasks package" href="blog.celery_tasks.html" />
+    <link rel="prev" title="blog package" href="blog.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="blog-blueprints-package">
+<h1>blog.blueprints package<a class="headerlink" href="#blog-blueprints-package" title="永久链接至标题">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="永久链接至标题">¶</a></h2>
+</div>
+<div class="section" id="module-blog.blueprints.admin">
+<span id="blog-blueprints-admin-module"></span><h2>blog.blueprints.admin module<a class="headerlink" href="#module-blog.blueprints.admin" title="永久链接至标题">¶</a></h2>
+<p>管理员</p>
+<p>url_for接受一个函数名作为参数，也接受对应url规则的命名变量
+未知的变量会添加到url尾部作为查询字符串</p>
+<dl>
+<dt>flask中request对象的实现原理：</dt><dd><dl class="simple">
+<dt>1。 Thread Local</dt><dd><p>每一个请求是一个独立的线程，请求之间的信息需要完全隔离开。避免冲突，实现线程安全
+Thread Local是一种特殊状态的对象，状态对于线程是隔离的，线程对Thread Local的修改
+并不会影响到其他的线程</p>
+</dd>
+</dl>
+<ol class="arabic" start="2">
+<li><dl>
+<dt>主要的实现依赖于三个类：</dt><dd><p>Local， LocalStack， LocalProxy</p>
+<p>__solts__类变量的作用是限制添加到实例对象上的属性
+__storage = {线程ID：{name: value}}
+线程ID通过掉用get_ident函数来实现</p>
+<dl class="simple">
+<dt>比如：</dt><dd><p>获取local.age属性的时候 –&gt; 触发__getattr__函数
+内部调用get_ident函数获取当前线程的ID，然后去__storage
+字典中进行查找是否存在对应的属性
+设置属性的时候也是同理</p>
+</dd>
+</dl>
+<p>__release_local__ 就是将当前的线程从__storage字典中删除</p>
+</dd>
+</dl>
+</li>
+</ol>
+</dd>
+</dl>
+<dl class="function">
+<dt id="blog.blueprints.admin.approve_comment">
+<code class="sig-prename descclassname">blog.blueprints.admin.</code><code class="sig-name descname">approve_comment</code><span class="sig-paren">(</span><em class="sig-param">comment_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog/blueprints/admin.html#approve_comment"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.blueprints.admin.approve_comment" title="永久链接至目标">¶</a></dt>
+<dd><blockquote>
+<div><p>审核评论</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">参数</dt>
+<dd class="field-odd"><p><strong>comment_id</strong> – </p>
+</dd>
+<dt class="field-even">返回</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="blog.blueprints.admin.delete_category">
+<code class="sig-prename descclassname">blog.blueprints.admin.</code><code class="sig-name descname">delete_category</code><span class="sig-paren">(</span><em class="sig-param">category_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog/blueprints/admin.html#delete_category"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.blueprints.admin.delete_category" title="永久链接至目标">¶</a></dt>
+<dd><blockquote>
+<div><p>删除分类</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">参数</dt>
+<dd class="field-odd"><p><strong>category_id</strong> – </p>
+</dd>
+<dt class="field-even">返回</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="blog.blueprints.admin.delete_comment">
+<code class="sig-prename descclassname">blog.blueprints.admin.</code><code class="sig-name descname">delete_comment</code><span class="sig-paren">(</span><em class="sig-param">comment_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog/blueprints/admin.html#delete_comment"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.blueprints.admin.delete_comment" title="永久链接至目标">¶</a></dt>
+<dd><blockquote>
+<div><p>删除评论</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">参数</dt>
+<dd class="field-odd"><p><strong>comment_id</strong> – </p>
+</dd>
+<dt class="field-even">返回</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="blog.blueprints.admin.delete_link">
+<code class="sig-prename descclassname">blog.blueprints.admin.</code><code class="sig-name descname">delete_link</code><span class="sig-paren">(</span><em class="sig-param">link_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog/blueprints/admin.html#delete_link"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.blueprints.admin.delete_link" title="永久链接至目标">¶</a></dt>
+<dd><blockquote>
+<div><p>删除链接</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">参数</dt>
+<dd class="field-odd"><p><strong>link_id</strong> – </p>
+</dd>
+<dt class="field-even">返回</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="blog.blueprints.admin.delete_post">
+<code class="sig-prename descclassname">blog.blueprints.admin.</code><code class="sig-name descname">delete_post</code><span class="sig-paren">(</span><em class="sig-param">post_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog/blueprints/admin.html#delete_post"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.blueprints.admin.delete_post" title="永久链接至目标">¶</a></dt>
+<dd><blockquote>
+<div><p>删除文章</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">参数</dt>
+<dd class="field-odd"><p><strong>post_id</strong> – </p>
+</dd>
+<dt class="field-even">返回</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="blog.blueprints.admin.edit_category">
+<code class="sig-prename descclassname">blog.blueprints.admin.</code><code class="sig-name descname">edit_category</code><span class="sig-paren">(</span><em class="sig-param">category_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog/blueprints/admin.html#edit_category"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.blueprints.admin.edit_category" title="永久链接至目标">¶</a></dt>
+<dd><blockquote>
+<div><p>编辑分类</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">参数</dt>
+<dd class="field-odd"><p><strong>category_id</strong> – </p>
+</dd>
+<dt class="field-even">返回</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="blog.blueprints.admin.edit_link">
+<code class="sig-prename descclassname">blog.blueprints.admin.</code><code class="sig-name descname">edit_link</code><span class="sig-paren">(</span><em class="sig-param">link_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog/blueprints/admin.html#edit_link"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.blueprints.admin.edit_link" title="永久链接至目标">¶</a></dt>
+<dd><blockquote>
+<div><p>编辑文章的链接</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">参数</dt>
+<dd class="field-odd"><p><strong>link_id</strong> – </p>
+</dd>
+<dt class="field-even">返回</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="blog.blueprints.admin.edit_post">
+<code class="sig-prename descclassname">blog.blueprints.admin.</code><code class="sig-name descname">edit_post</code><span class="sig-paren">(</span><em class="sig-param">post_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog/blueprints/admin.html#edit_post"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.blueprints.admin.edit_post" title="永久链接至目标">¶</a></dt>
+<dd><blockquote>
+<div><p>编辑文章</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">返回</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="blog.blueprints.admin.manage_category">
+<code class="sig-prename descclassname">blog.blueprints.admin.</code><code class="sig-name descname">manage_category</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog/blueprints/admin.html#manage_category"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.blueprints.admin.manage_category" title="永久链接至目标">¶</a></dt>
+<dd><blockquote>
+<div><p>管理分类</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">返回</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="blog.blueprints.admin.manage_comment">
+<code class="sig-prename descclassname">blog.blueprints.admin.</code><code class="sig-name descname">manage_comment</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog/blueprints/admin.html#manage_comment"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.blueprints.admin.manage_comment" title="永久链接至目标">¶</a></dt>
+<dd><blockquote>
+<div><p>管理评论</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">返回</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="blog.blueprints.admin.manage_link">
+<code class="sig-prename descclassname">blog.blueprints.admin.</code><code class="sig-name descname">manage_link</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog/blueprints/admin.html#manage_link"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.blueprints.admin.manage_link" title="永久链接至目标">¶</a></dt>
+<dd><blockquote>
+<div><p>管理链接，这里的链接之所以能不传入模板
+是因为在模板上下文处理函数中默认传入模板中的</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">返回</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="blog.blueprints.admin.manage_post">
+<code class="sig-prename descclassname">blog.blueprints.admin.</code><code class="sig-name descname">manage_post</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog/blueprints/admin.html#manage_post"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.blueprints.admin.manage_post" title="永久链接至目标">¶</a></dt>
+<dd><blockquote>
+<div><p>文章管理页面</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">返回</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="blog.blueprints.admin.new_category">
+<code class="sig-prename descclassname">blog.blueprints.admin.</code><code class="sig-name descname">new_category</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog/blueprints/admin.html#new_category"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.blueprints.admin.new_category" title="永久链接至目标">¶</a></dt>
+<dd><blockquote>
+<div><p>新建文章分类</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">返回</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="blog.blueprints.admin.new_link">
+<code class="sig-prename descclassname">blog.blueprints.admin.</code><code class="sig-name descname">new_link</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog/blueprints/admin.html#new_link"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.blueprints.admin.new_link" title="永久链接至目标">¶</a></dt>
+<dd><blockquote>
+<div><p>新建链接</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">返回</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="blog.blueprints.admin.new_post">
+<code class="sig-prename descclassname">blog.blueprints.admin.</code><code class="sig-name descname">new_post</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog/blueprints/admin.html#new_post"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.blueprints.admin.new_post" title="永久链接至目标">¶</a></dt>
+<dd><blockquote>
+<div><p>添加文章页面</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">返回</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="blog.blueprints.admin.set_comment">
+<code class="sig-prename descclassname">blog.blueprints.admin.</code><code class="sig-name descname">set_comment</code><span class="sig-paren">(</span><em class="sig-param">post_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog/blueprints/admin.html#set_comment"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.blueprints.admin.set_comment" title="永久链接至目标">¶</a></dt>
+<dd><blockquote>
+<div><p>开启/关闭文章评论</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">参数</dt>
+<dd class="field-odd"><p><strong>post_id</strong> – 文章id</p>
+</dd>
+<dt class="field-even">返回</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="blog.blueprints.admin.settings">
+<code class="sig-prename descclassname">blog.blueprints.admin.</code><code class="sig-name descname">settings</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog/blueprints/admin.html#settings"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.blueprints.admin.settings" title="永久链接至目标">¶</a></dt>
+<dd><blockquote>
+<div><p>博客的设置页面</p>
+<p>login_required装饰器实现了视图保护，只有登录之后的用户才能访问被视图保护装饰的视图函数</p>
+<p>** 当为视图函数添加多个装饰器的时候，route装饰器应该位于最外层</p>
+<p>当未登录的用户访问需要登录才能请求的视图函数的时候，如果添加了login_required装饰器
+程序会自动重定向到登录页面，此时需要通过login_manager的login_view属性设置重定向的视图函数
+并且通过login_message_category设置提示消息的类别，login_message设置提示消息的内容
+具体见extensions文件</p>
+<p>在重定向的url中，会自动包含上一个页面的next参数，当登录了之后，会自动重定向到next参数指定的页面</p>
+<p>如果想为整个蓝图添加视图保护，可以使用请求钩子，添加login_required装饰器</p>
+<dl class="simple">
+<dt>常见的响应状态码：</dt><dd><p>200   成功
+201   请求成功，并且新建了资源
+204   请求成功，但是没有内容返回
+301   永久重定向
+302   临时重定向
+304   请求的内容没有修改，Not Modified 重定向到缓存
+404   请求的资源不存在
+400   请求参数不正确
+401   请求的用户没有认证
+403   请求的用户没有权限
+500   服务器内部错误</p>
+</dd>
+</dl>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">返回</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="blog.blueprints.admin.upload">
+<code class="sig-prename descclassname">blog.blueprints.admin.</code><code class="sig-name descname">upload</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog/blueprints/admin.html#upload"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.blueprints.admin.upload" title="永久链接至目标">¶</a></dt>
+<dd><blockquote>
+<div><p>在集成富文本编辑器的时候，因为表单默认开启了CSRF保护，所以上传图片不会成功
+需要配置CKEDITOR_ENABLE_CSRF = True来关闭CSRF验证，导致的400错误</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">返回</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="blog.blueprints.admin.upload_avatar">
+<code class="sig-prename descclassname">blog.blueprints.admin.</code><code class="sig-name descname">upload_avatar</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog/blueprints/admin.html#upload_avatar"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.blueprints.admin.upload_avatar" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="blog.blueprints.admin.uploaded_files">
+<code class="sig-prename descclassname">blog.blueprints.admin.</code><code class="sig-name descname">uploaded_files</code><span class="sig-paren">(</span><em class="sig-param">filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog/blueprints/admin.html#uploaded_files"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.blueprints.admin.uploaded_files" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-blog.blueprints.auth">
+<span id="blog-blueprints-auth-module"></span><h2>blog.blueprints.auth module<a class="headerlink" href="#module-blog.blueprints.auth" title="永久链接至标题">¶</a></h2>
+<p>蓝图对象是一个用于注册路由等操作的临时对象
+蓝图中的视图函数通过蓝图实例提供的route()装饰器注册
+使用蓝图实例的errorhandler()装饰器可以把错误处理器注册到蓝图上
+这些错误处理器只会处理访问该蓝图中的视图函数时发生的错误，使用蓝图实例的app_errorhandler()装饰器
+可以注册一个全局的错误处理器</p>
+<blockquote>
+<div><p>404和405错误仅会被全局的错误处理函数捕捉，如果区分蓝图url下的404和405错误
+可以在全局定义的404错误处理函数中使用request.path.statrswith(蓝图的url前缀)
+来判断请求的url是否属于某一个蓝图</p>
+</div></blockquote>
+<p>蓝图中，可以使用请求钩子注册的请求处理函数是蓝图独有的，只有蓝图中的视图函数会触发相应的请求处理函数
+另外，可以在蓝图中使用before_app_request, after_app_request,teardown_app_request, before_app_first_request方法
+这些方法注册的请求处理函数是全局的</p>
+<dl class="simple">
+<dt>模板上下文处理函数</dt><dd><p>使用context_processor装饰器注册蓝图特有的模板上下文处理器，使用app_context_processor装饰器则会注册程序全局的模板上下文处理器
+蓝图对象也可以使用app_template_global(), app_template_filter(), app_template_test()装饰器
+注册全局模板全局函数，模板过滤器函数和模板测试器</p>
+</dd>
+</dl>
+<p>并不是所有程序实例提供的方法和属性都可以在蓝图对象中使用，蓝图对象中只提供了少量用于注册处理函数的方法
+大部分的属性和方法仍然需要通过程序实例app获取，比如配置config属性和自定义注册命令的cli.command()装饰器</p>
+<p>为了使蓝图能够发挥作用，我们必须把蓝图注册到程序实例app上</p>
+<dl class="function">
+<dt id="blog.blueprints.auth.confirm">
+<code class="sig-prename descclassname">blog.blueprints.auth.</code><code class="sig-name descname">confirm</code><span class="sig-paren">(</span><em class="sig-param">token</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog/blueprints/auth.html#confirm"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.blueprints.auth.confirm" title="永久链接至目标">¶</a></dt>
+<dd><blockquote>
+<div><p>确认邮箱</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">参数</dt>
+<dd class="field-odd"><p><strong>token</strong> – 签名</p>
+</dd>
+<dt class="field-even">返回</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="blog.blueprints.auth.get_avatar">
+<code class="sig-prename descclassname">blog.blueprints.auth.</code><code class="sig-name descname">get_avatar</code><span class="sig-paren">(</span><em class="sig-param">filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog/blueprints/auth.html#get_avatar"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.blueprints.auth.get_avatar" title="永久链接至目标">¶</a></dt>
+<dd><blockquote>
+<div><p>获取用户头像,将目录中的文件返回</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">返回</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="blog.blueprints.auth.login">
+<code class="sig-prename descclassname">blog.blueprints.auth.</code><code class="sig-name descname">login</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog/blueprints/auth.html#login"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.blueprints.auth.login" title="永久链接至目标">¶</a></dt>
+<dd><p>用户登陆</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="blog.blueprints.auth.logout">
+<code class="sig-prename descclassname">blog.blueprints.auth.</code><code class="sig-name descname">logout</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog/blueprints/auth.html#logout"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.blueprints.auth.logout" title="永久链接至目标">¶</a></dt>
+<dd><p>用户登出 使用flask_login的logout()函数实现</p>
+<p>login_out()函数会登出用户并且清除session中存储的用户id和remember_token的值</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="blog.blueprints.auth.reconfirm_email">
+<code class="sig-prename descclassname">blog.blueprints.auth.</code><code class="sig-name descname">reconfirm_email</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog/blueprints/auth.html#reconfirm_email"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.blueprints.auth.reconfirm_email" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="blog.blueprints.auth.register">
+<code class="sig-prename descclassname">blog.blueprints.auth.</code><code class="sig-name descname">register</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog/blueprints/auth.html#register"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.blueprints.auth.register" title="永久链接至目标">¶</a></dt>
+<dd><p>用户注册</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-blog.blueprints.blog">
+<span id="blog-blueprints-blog-module"></span><h2>blog.blueprints.blog module<a class="headerlink" href="#module-blog.blueprints.blog" title="永久链接至标题">¶</a></h2>
+<p>博客蓝图</p>
+<dl>
+<dt>为蓝图增加蓝图的路由的两种方式：</dt><dd><ol class="arabic">
+<li><p>使用装饰器，蓝图对象.route()  –&gt;  先将路由注册到蓝图对象上，当将蓝图对象注册到程序实例上的时候，在将路由注册到程序实例上</p>
+<blockquote>
+<div><dl>
+<dt>对于蓝图对象的理解：</dt><dd><dl class="simple">
+<dt>1。 蓝图对象是一种命名空间，使用蓝图对象添加的路由，都属于蓝图对象的命名空间上，可以通过app.url_map()来查看</dt><dd><p>Rule(‘/index’),  蓝图对象.endpoint  view_func()</p>
+</dd>
+</dl>
+<ol class="arabic simple" start="2">
+<li><p>使用蓝图对象可以实现项目结构的有序化的组织，可以将程序分离成不同的部分</p></li>
+</ol>
+</dd>
+</dl>
+</div></blockquote>
+</li>
+<li><dl class="simple">
+<dt>app.add_url_rule(rule, endpoint, view_func)</dt><dd><p>在路由中，视图函数和url规则不是直接映射的，之所以不直接映射，是为了实现蓝图的命名空间
+如果存在多个同名的视图函数，会存在路由的冲突，增加了端点名作为媒介，可以实现不同命名空间的映射</p>
+</dd>
+</dl>
+</li>
+</ol>
+</dd>
+<dt>paginate()分页的使用：</dt><dd><dl class="simple">
+<dt>1。 接受的参数：page –&gt; 页数  per-page –&gt; 每页的个数， error_out —&gt; 当查询的页数超过总页数的行为</dt><dd><p>max_per_page –&gt; 设置每页查询的最大数量
+当error_out参数设置为True的时候，如果查询的页数超过最大值，或者是page或者per_page为负数或者非整型值的时候
+会返回404错误，如果设置为False，直接返回None，默认是True</p>
+</dd>
+</dl>
+<ol class="arabic" start="2">
+<li><dl>
+<dt>对查询结果使用paginate方法传入相应的参数，可以返回一个分页对象，包含分页的信息</dt><dd><dl class="simple">
+<dt>分页对象一些常见的属性：</dt><dd><p>has_next  —&gt;    是否包含下一页，包含的时候返回True，不包含的时候返回False
+has_prev  —&gt;    是否包含上一页，包含返回true，不包含返回false
+items     —&gt;    返回分页之后的数据
+next_num  —&gt;    下一页的页数，没有下一页返回None
+prev_num  —&gt;    上一页的页数，没有上一页返回None
+page      —&gt;    当前的页数
+pages     —&gt;    总页数
+per_page  —&gt;    每页的个数
+query     —&gt;    分页的查询语句
+total     —&gt;    总的记录的数量</p>
+</dd>
+</dl>
+<p>如果没有指定page参数和per_page参数，flask_sqlalchemy会自动从查询字符串中寻找对应的值
+如果没有获取到，，使用默认值，page=1，per_page=20</p>
+</dd>
+</dl>
+</li>
+</ol>
+</dd>
+</dl>
+<dl class="function">
+<dt id="blog.blueprints.blog.about">
+<code class="sig-prename descclassname">blog.blueprints.blog.</code><code class="sig-name descname">about</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog/blueprints/blog.html#about"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.blueprints.blog.about" title="永久链接至目标">¶</a></dt>
+<dd><p>展示关于的信息</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="blog.blueprints.blog.change_theme">
+<code class="sig-prename descclassname">blog.blueprints.blog.</code><code class="sig-name descname">change_theme</code><span class="sig-paren">(</span><em class="sig-param">theme_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog/blueprints/blog.html#change_theme"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.blueprints.blog.change_theme" title="永久链接至目标">¶</a></dt>
+<dd><blockquote>
+<div><p>博客切换主体视图
+1.  将主题的名称存储在cookie中，名称为theme</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">参数</dt>
+<dd class="field-odd"><p><strong>theme_name</strong> – 主体名</p>
+</dd>
+<dt class="field-even">返回</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="blog.blueprints.blog.index">
+<code class="sig-prename descclassname">blog.blueprints.blog.</code><code class="sig-name descname">index</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog/blueprints/blog.html#index"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.blueprints.blog.index" title="永久链接至目标">¶</a></dt>
+<dd><p>首页视图</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="blog.blueprints.blog.reply_comment">
+<code class="sig-prename descclassname">blog.blueprints.blog.</code><code class="sig-name descname">reply_comment</code><span class="sig-paren">(</span><em class="sig-param">comment_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog/blueprints/blog.html#reply_comment"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.blueprints.blog.reply_comment" title="永久链接至目标">¶</a></dt>
+<dd><blockquote>
+<div><p>回复评论</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">参数</dt>
+<dd class="field-odd"><p><strong>comment_id</strong> – 评论id</p>
+</dd>
+<dt class="field-even">返回</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="blog.blueprints.blog.show_category">
+<code class="sig-prename descclassname">blog.blueprints.blog.</code><code class="sig-name descname">show_category</code><span class="sig-paren">(</span><em class="sig-param">category_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog/blueprints/blog.html#show_category"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.blueprints.blog.show_category" title="永久链接至目标">¶</a></dt>
+<dd><blockquote>
+<div><p>分类文章列表(边栏的分页文章)</p>
+<p>直接调用category.posts，会以列表的形式返回分类对应的文章，但是无法再次使用查询过滤器
+使用with_parent方法会返回查询的对象，可以链式调用查询过滤器</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">参数</dt>
+<dd class="field-odd"><p><strong>category_id</strong> – 分类id</p>
+</dd>
+<dt class="field-even">返回</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="blog.blueprints.blog.show_post">
+<code class="sig-prename descclassname">blog.blueprints.blog.</code><code class="sig-name descname">show_post</code><span class="sig-paren">(</span><em class="sig-param">post_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blog/blueprints/blog.html#show_post"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#blog.blueprints.blog.show_post" title="永久链接至目标">¶</a></dt>
+<dd><blockquote>
+<div><p>博客文章视图</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">参数</dt>
+<dd class="field-odd"><p><strong>post_id</strong> – 文章id</p>
+</dd>
+<dt class="field-even">返回</dt>
+<dd class="field-even"><p>模板</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-blog.blueprints">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-blog.blueprints" title="永久链接至标题">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">blog</a></h1>
+
+
+
+
+
+
+
+
+<h3>导航</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">blog</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="blog.html">blog package</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="modules.html">blog</a><ul>
+  <li><a href="blog.html">blog package</a><ul>
+      <li>Previous: <a href="blog.html" title="上一章">blog package</a></li>
+      <li>Next: <a href="blog.celery_tasks.html" title="下一章">blog.celery_tasks package</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">快速搜索</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="转向" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, wangdong.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/blog.blueprints.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

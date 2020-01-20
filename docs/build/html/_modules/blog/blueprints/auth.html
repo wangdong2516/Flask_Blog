@@ -1,0 +1,252 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_cn">
+  <head>
+    <meta charset="utf-8" />
+    <title>blog.blueprints.auth &#8212; blog 0.1 文档</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    <script type="text/javascript" src="../../../_static/translations.js"></script>
+    <link rel="index" title="索引" href="../../../genindex.html" />
+    <link rel="search" title="搜索" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>blog.blueprints.auth 源代码</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    蓝图对象是一个用于注册路由等操作的临时对象</span>
+<span class="sd">    蓝图中的视图函数通过蓝图实例提供的route()装饰器注册</span>
+<span class="sd">    使用蓝图实例的errorhandler()装饰器可以把错误处理器注册到蓝图上</span>
+<span class="sd">    这些错误处理器只会处理访问该蓝图中的视图函数时发生的错误，使用蓝图实例的app_errorhandler()装饰器</span>
+<span class="sd">    可以注册一个全局的错误处理器</span>
+<span class="sd">        404和405错误仅会被全局的错误处理函数捕捉，如果区分蓝图url下的404和405错误</span>
+<span class="sd">        可以在全局定义的404错误处理函数中使用request.path.statrswith(蓝图的url前缀)</span>
+<span class="sd">        来判断请求的url是否属于某一个蓝图</span>
+
+<span class="sd">    蓝图中，可以使用请求钩子注册的请求处理函数是蓝图独有的，只有蓝图中的视图函数会触发相应的请求处理函数</span>
+<span class="sd">    另外，可以在蓝图中使用before_app_request, after_app_request,teardown_app_request, before_app_first_request方法</span>
+<span class="sd">    这些方法注册的请求处理函数是全局的</span>
+
+<span class="sd">    模板上下文处理函数</span>
+<span class="sd">        使用context_processor装饰器注册蓝图特有的模板上下文处理器，使用app_context_processor装饰器则会注册程序全局的模板上下文处理器</span>
+<span class="sd">        蓝图对象也可以使用app_template_global(), app_template_filter(), app_template_test()装饰器</span>
+<span class="sd">        注册全局模板全局函数，模板过滤器函数和模板测试器</span>
+
+<span class="sd">    并不是所有程序实例提供的方法和属性都可以在蓝图对象中使用，蓝图对象中只提供了少量用于注册处理函数的方法</span>
+<span class="sd">    大部分的属性和方法仍然需要通过程序实例app获取，比如配置config属性和自定义注册命令的cli.command()装饰器</span>
+
+<span class="sd">    为了使蓝图能够发挥作用，我们必须把蓝图注册到程序实例app上</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">Blueprint</span><span class="p">,</span> <span class="n">current_app</span>
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">redirect</span><span class="p">,</span> <span class="n">url_for</span>
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">flash</span>
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">render_template</span>
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">send_from_directory</span>
+
+<span class="kn">from</span> <span class="nn">flask_login</span> <span class="kn">import</span> <span class="n">current_user</span><span class="p">,</span> <span class="n">login_user</span><span class="p">,</span> <span class="n">logout_user</span><span class="p">,</span> <span class="n">login_required</span>
+<span class="kn">from</span> <span class="nn">blog.celery_tasks.email.tasks</span> <span class="kn">import</span> <span class="n">send_confirm_email</span><span class="p">,</span> <span class="n">resend_confirm_email</span>
+<span class="kn">from</span> <span class="nn">blog.forms</span> <span class="kn">import</span> <span class="n">LoginForm</span><span class="p">,</span> <span class="n">RegisterForm</span>
+<span class="kn">from</span> <span class="nn">blog.models</span> <span class="kn">import</span> <span class="n">Admin</span>
+<span class="kn">from</span> <span class="nn">blog.utils</span> <span class="kn">import</span> <span class="n">redirect_back</span><span class="p">,</span> <span class="n">commit_data</span><span class="p">,</span> <span class="n">generate_confirmation_token</span><span class="p">,</span> <span class="n">confirm_token</span>
+<span class="kn">from</span> <span class="nn">blog.settings</span> <span class="kn">import</span> <span class="n">Operations</span>
+
+
+<span class="n">auth_dp</span> <span class="o">=</span> <span class="n">Blueprint</span><span class="p">(</span><span class="s1">&#39;auth&#39;</span><span class="p">,</span> <span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="login"><a class="viewcode-back" href="../../../blog.blueprints.html#blog.blueprints.auth.login">[文档]</a><span class="nd">@auth_dp</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/login&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">login</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;用户登陆&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">current_user</span><span class="o">.</span><span class="n">is_authenticated</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;如果用户经过认证,重定向到首页&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">url_for</span><span class="p">(</span><span class="s1">&#39;blog.index&#39;</span><span class="p">))</span>
+
+    <span class="n">form</span> <span class="o">=</span> <span class="n">LoginForm</span><span class="p">()</span>  <span class="c1"># 渲染登录的表单</span>
+
+    <span class="k">if</span> <span class="n">form</span><span class="o">.</span><span class="n">validate_on_submit</span><span class="p">():</span>
+        <span class="sd">&quot;&quot;&quot;表单验证成功的逻辑&quot;&quot;&quot;</span>
+        <span class="n">username</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">username</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">password</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">password</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">remember</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">remember</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">admin</span> <span class="o">=</span> <span class="n">Admin</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="n">username</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">admin</span><span class="p">:</span>
+            <span class="sd">&quot;&quot;&quot;验证用户名和密码&quot;&quot;&quot;</span>
+            <span class="k">if</span> <span class="n">username</span> <span class="o">==</span> <span class="n">admin</span><span class="o">.</span><span class="n">username</span> <span class="ow">and</span> <span class="n">admin</span><span class="o">.</span><span class="n">validate_password</span><span class="p">(</span><span class="n">password</span><span class="p">):</span>
+                <span class="n">login_user</span><span class="p">(</span><span class="n">admin</span><span class="p">,</span> <span class="n">remember</span><span class="p">)</span>  <span class="c1"># 实现登陆用户的会话管理，记录用户的登陆状态</span>
+                <span class="n">flash</span><span class="p">(</span><span class="s1">&#39;欢迎回来！！！&#39;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">redirect_back</span><span class="p">()</span>  <span class="c1"># 返回上一个页面</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">flash</span><span class="p">(</span><span class="s1">&#39;无效的用户名或者是密码&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">flash</span><span class="p">(</span><span class="s1">&#39;不是管理员帐号&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;auth/login.html&#39;</span><span class="p">,</span> <span class="n">form</span><span class="o">=</span><span class="n">form</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="logout"><a class="viewcode-back" href="../../../blog.blueprints.html#blog.blueprints.auth.logout">[文档]</a><span class="nd">@auth_dp</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;logout&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">logout</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        用户登出 使用flask_login的logout()函数实现</span>
+
+<span class="sd">        login_out()函数会登出用户并且清除session中存储的用户id和remember_token的值</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">logout_user</span><span class="p">()</span>
+    <span class="n">flash</span><span class="p">(</span><span class="s1">&#39;退出成功&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">redirect_back</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="register"><a class="viewcode-back" href="../../../blog.blueprints.html#blog.blueprints.auth.register">[文档]</a><span class="nd">@auth_dp</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/register&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">register</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;用户注册&quot;&quot;&quot;</span>
+    <span class="n">form</span> <span class="o">=</span> <span class="n">RegisterForm</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">form</span><span class="o">.</span><span class="n">validate_on_submit</span><span class="p">():</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">username</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">username</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">password</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">password</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">blog_title</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">blog_title</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">blog_sub_title</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">blog_sub_title</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">about</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">about</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">email</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">email</span><span class="o">.</span><span class="n">data</span>
+        <span class="c1"># 添加一个用户</span>
+        <span class="n">admin</span> <span class="o">=</span> <span class="n">Admin</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">username</span><span class="o">=</span><span class="n">username</span><span class="p">,</span> <span class="n">blog_title</span><span class="o">=</span><span class="n">blog_title</span><span class="p">,</span>
+            <span class="n">blog_sub_title</span><span class="o">=</span><span class="n">blog_sub_title</span><span class="p">,</span> <span class="n">about</span><span class="o">=</span><span class="n">about</span><span class="p">,</span> <span class="n">email</span><span class="o">=</span><span class="n">email</span>
+        <span class="p">)</span>
+        <span class="n">admin</span><span class="o">.</span><span class="n">set_password</span><span class="p">(</span><span class="n">password</span><span class="p">)</span>
+        <span class="n">commit_data</span><span class="p">(</span><span class="s1">&#39;add&#39;</span><span class="p">,</span> <span class="n">admin</span><span class="p">)</span>
+        <span class="n">token</span> <span class="o">=</span> <span class="n">generate_confirmation_token</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="n">admin</span><span class="p">,</span> <span class="n">op</span><span class="o">=</span><span class="n">Operations</span><span class="o">.</span><span class="n">CONFIRM</span><span class="p">)</span>  <span class="c1"># 生成一个签名</span>
+        <span class="n">send_confirm_email</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="n">current_user</span><span class="p">,</span> <span class="n">token</span><span class="o">=</span><span class="n">token</span><span class="p">)</span>  <span class="c1"># 发送确认邮件</span>
+        <span class="n">flash</span><span class="p">(</span><span class="s1">&#39;电子邮件已经发送，请注意查收！&#39;</span><span class="p">,</span> <span class="s1">&#39;success&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">url_for</span><span class="p">(</span><span class="s1">&#39;.login&#39;</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;auth/register.html&#39;</span><span class="p">,</span> <span class="n">form</span><span class="o">=</span><span class="n">form</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="confirm"><a class="viewcode-back" href="../../../blog.blueprints.html#blog.blueprints.auth.confirm">[文档]</a><span class="nd">@auth_dp</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/confirm/&lt;path:token&gt;&#39;</span><span class="p">)</span>
+<span class="nd">@login_required</span>
+<span class="k">def</span> <span class="nf">confirm</span><span class="p">(</span><span class="n">token</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        确认邮箱</span>
+<span class="sd">    :param token: 签名</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">confirm_token</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="n">current_user</span><span class="p">,</span> <span class="n">token</span><span class="o">=</span><span class="n">token</span><span class="p">,</span> <span class="n">op</span><span class="o">=</span><span class="n">Operations</span><span class="o">.</span><span class="n">CONFIRM</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;签名验证成功的逻辑&quot;&quot;&quot;</span>
+        <span class="n">flash</span><span class="p">(</span><span class="s1">&#39;邮箱验证成功&#39;</span><span class="p">,</span> <span class="s1">&#39;success&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">url_for</span><span class="p">(</span><span class="s1">&#39;blog.index&#39;</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">flash</span><span class="p">(</span><span class="s1">&#39;邮箱验证失败！签名无效或者已经过期&#39;</span><span class="p">,</span> <span class="s1">&#39;warning&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">url_for</span><span class="p">(</span><span class="s1">&#39;.reconfirm_email&#39;</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="reconfirm_email"><a class="viewcode-back" href="../../../blog.blueprints.html#blog.blueprints.auth.reconfirm_email">[文档]</a><span class="nd">@auth_dp</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/resend/email&#39;</span><span class="p">)</span>
+<span class="nd">@login_required</span>
+<span class="k">def</span> <span class="nf">reconfirm_email</span><span class="p">():</span>
+    <span class="c1"># 重新生成签名</span>
+    <span class="n">token</span> <span class="o">=</span> <span class="n">generate_confirmation_token</span><span class="p">(</span><span class="n">current_user</span><span class="p">,</span> <span class="n">op</span><span class="o">=</span><span class="n">Operations</span><span class="o">.</span><span class="n">CONFIRM</span><span class="p">)</span>
+    <span class="c1"># 重新发送短信验证码</span>
+    <span class="n">user</span> <span class="o">=</span> <span class="n">current_user</span>
+    <span class="n">resend_confirm_email</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">token</span><span class="o">=</span><span class="n">token</span><span class="p">)</span>
+    <span class="n">flash</span><span class="p">(</span><span class="s1">&#39;邮件发送成功，请注意查收！&#39;</span><span class="p">,</span> <span class="s1">&#39;success&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">url_for</span><span class="p">(</span><span class="s1">&#39;.login&#39;</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="get_avatar"><a class="viewcode-back" href="../../../blog.blueprints.html#blog.blueprints.auth.get_avatar">[文档]</a><span class="nd">@auth_dp</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/avatars/&lt;path:filename&gt;&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">get_avatar</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        获取用户头像,将目录中的文件返回</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">send_from_directory</span><span class="p">(</span><span class="n">current_app</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;AVATARS_SAVE_PATH&#39;</span><span class="p">],</span> <span class="n">filename</span><span class="p">)</span></div>
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">blog</a></h1>
+
+
+
+
+
+
+
+
+<h3>导航</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">blog</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">模块代码</a><ul>
+  <li><a href="../../blog.html">blog</a><ul>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">快速搜索</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="转向" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, wangdong.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

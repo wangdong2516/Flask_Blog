@@ -1,0 +1,234 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_cn">
+  <head>
+    <meta charset="utf-8" />
+    <title>blog.forms &#8212; blog 0.1 文档</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <script type="text/javascript" src="../../_static/translations.js"></script>
+    <link rel="index" title="索引" href="../../genindex.html" />
+    <link rel="search" title="搜索" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>blog.forms 源代码</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    表单类的定义</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">flask_ckeditor</span> <span class="kn">import</span> <span class="n">CKEditorField</span>
+<span class="kn">from</span> <span class="nn">flask_wtf.file</span> <span class="kn">import</span> <span class="n">FileRequired</span><span class="p">,</span> <span class="n">FileAllowed</span>
+
+<span class="kn">from</span> <span class="nn">blog.models</span> <span class="kn">import</span> <span class="n">Category</span>
+<span class="kn">from</span> <span class="nn">flask_wtf</span> <span class="kn">import</span> <span class="n">FlaskForm</span>  <span class="c1"># 导入表单类</span>
+<span class="kn">from</span> <span class="nn">wtforms</span> <span class="kn">import</span> <span class="n">SubmitField</span><span class="p">,</span> <span class="n">StringField</span><span class="p">,</span> <span class="n">SelectField</span><span class="p">,</span> <span class="n">TextAreaField</span><span class="p">,</span> <span class="n">HiddenField</span><span class="p">,</span> <span class="n">FileField</span>  <span class="c1"># 导入表单字段</span>
+<span class="kn">from</span> <span class="nn">wtforms</span> <span class="kn">import</span> <span class="n">BooleanField</span><span class="p">,</span> <span class="n">PasswordField</span><span class="p">,</span> <span class="n">ValidationError</span>  <span class="c1"># 导入表单字段</span>
+<span class="kn">from</span> <span class="nn">wtforms.validators</span> <span class="kn">import</span> <span class="n">DataRequired</span><span class="p">,</span> <span class="n">URL</span><span class="p">,</span> <span class="n">Length</span><span class="p">,</span> <span class="n">Email</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">EqualTo</span>  <span class="c1"># 导入验证函数</span>
+<span class="kn">from</span> <span class="nn">blog.models</span> <span class="kn">import</span> <span class="n">Admin</span>
+
+
+<div class="viewcode-block" id="LoginForm"><a class="viewcode-back" href="../../blog.html#blog.forms.LoginForm">[文档]</a><span class="k">class</span> <span class="nc">LoginForm</span><span class="p">(</span><span class="n">FlaskForm</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        登陆表单类</span>
+<span class="sd">        表单类属性将渲染成表单的name和id属性</span>
+<span class="sd">        实例化表单字段传入的第一个参数将渲染为展示的字段名</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">username</span> <span class="o">=</span> <span class="n">StringField</span><span class="p">(</span><span class="s1">&#39;用户名&#39;</span><span class="p">,</span> <span class="n">validators</span><span class="o">=</span><span class="p">[</span><span class="n">DataRequired</span><span class="p">(),</span> <span class="n">Length</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">20</span><span class="p">)])</span>  <span class="c1"># 用户名字段</span>
+    <span class="n">password</span> <span class="o">=</span> <span class="n">PasswordField</span><span class="p">(</span><span class="s1">&#39;密码&#39;</span><span class="p">,</span> <span class="n">validators</span><span class="o">=</span><span class="p">[</span><span class="n">DataRequired</span><span class="p">(),</span> <span class="n">Length</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">128</span><span class="p">)])</span>  <span class="c1"># 密码字段</span>
+    <span class="n">password_</span> <span class="o">=</span> <span class="n">PasswordField</span><span class="p">(</span>
+        <span class="s1">&#39;确认密码&#39;</span><span class="p">,</span> <span class="n">validators</span><span class="o">=</span><span class="p">[</span><span class="n">DataRequired</span><span class="p">(),</span> <span class="n">Length</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">128</span><span class="p">),</span>
+                                 <span class="n">EqualTo</span><span class="p">(</span><span class="s1">&#39;password&#39;</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="s1">&#39;密码输入错误，请重新输入&#39;</span><span class="p">)]</span>
+    <span class="p">)</span>  <span class="c1"># 确认密码</span>
+    <span class="n">remember</span> <span class="o">=</span> <span class="n">BooleanField</span><span class="p">(</span><span class="s1">&#39;记住密码&#39;</span><span class="p">)</span>  <span class="c1"># 记住密码</span>
+    <span class="n">submit</span> <span class="o">=</span> <span class="n">SubmitField</span><span class="p">(</span><span class="s1">&#39;登录&#39;</span><span class="p">)</span>  <span class="c1"># 提交按钮</span></div>
+
+
+<div class="viewcode-block" id="SettingForm"><a class="viewcode-back" href="../../blog.html#blog.forms.SettingForm">[文档]</a><span class="k">class</span> <span class="nc">SettingForm</span><span class="p">(</span><span class="n">FlaskForm</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">StringField</span><span class="p">(</span><span class="s1">&#39;姓名&#39;</span><span class="p">,</span> <span class="n">validators</span><span class="o">=</span><span class="p">[</span><span class="n">DataRequired</span><span class="p">(),</span> <span class="n">Length</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">30</span><span class="p">)])</span>
+    <span class="n">blog_title</span> <span class="o">=</span> <span class="n">StringField</span><span class="p">(</span><span class="s1">&#39;博客标题&#39;</span><span class="p">,</span> <span class="n">validators</span><span class="o">=</span><span class="p">[</span><span class="n">DataRequired</span><span class="p">(),</span> <span class="n">Length</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">60</span><span class="p">)])</span>
+    <span class="n">blog_sub_title</span> <span class="o">=</span> <span class="n">StringField</span><span class="p">(</span><span class="s1">&#39;博客副标题&#39;</span><span class="p">,</span> <span class="n">validators</span><span class="o">=</span><span class="p">[</span><span class="n">DataRequired</span><span class="p">(),</span> <span class="n">Length</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">100</span><span class="p">)])</span>
+    <span class="n">about</span> <span class="o">=</span> <span class="n">CKEditorField</span><span class="p">(</span><span class="s1">&#39;关于&#39;</span><span class="p">,</span> <span class="n">validators</span><span class="o">=</span><span class="p">[</span><span class="n">DataRequired</span><span class="p">()])</span>
+    <span class="n">submit</span> <span class="o">=</span> <span class="n">SubmitField</span><span class="p">(</span><span class="s1">&#39;提交&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="CommentForm"><a class="viewcode-back" href="../../blog.html#blog.forms.CommentForm">[文档]</a><span class="k">class</span> <span class="nc">CommentForm</span><span class="p">(</span><span class="n">FlaskForm</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;评论表单&quot;&quot;&quot;</span>
+
+    <span class="n">author</span> <span class="o">=</span> <span class="n">StringField</span><span class="p">(</span><span class="s1">&#39;姓名&#39;</span><span class="p">,</span> <span class="n">validators</span><span class="o">=</span><span class="p">[</span><span class="n">DataRequired</span><span class="p">(),</span> <span class="n">Length</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">30</span><span class="p">)])</span>  <span class="c1"># 姓名(作者)</span>
+    <span class="n">email</span> <span class="o">=</span> <span class="n">StringField</span><span class="p">(</span><span class="s1">&#39;邮箱&#39;</span><span class="p">,</span> <span class="n">validators</span><span class="o">=</span><span class="p">[</span><span class="n">DataRequired</span><span class="p">(),</span> <span class="n">Email</span><span class="p">(),</span> <span class="n">Length</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">254</span><span class="p">)])</span>  <span class="c1"># 邮箱</span>
+    <span class="n">site</span> <span class="o">=</span> <span class="n">StringField</span><span class="p">(</span><span class="s1">&#39;站点&#39;</span><span class="p">,</span> <span class="n">validators</span><span class="o">=</span><span class="p">[</span><span class="n">Optional</span><span class="p">(),</span> <span class="n">URL</span><span class="p">(),</span> <span class="n">Length</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">)])</span>
+    <span class="n">body</span> <span class="o">=</span> <span class="n">TextAreaField</span><span class="p">(</span><span class="s1">&#39;内容&#39;</span><span class="p">,</span> <span class="n">validators</span><span class="o">=</span><span class="p">[</span><span class="n">DataRequired</span><span class="p">()])</span>
+    <span class="n">submit</span> <span class="o">=</span> <span class="n">SubmitField</span><span class="p">(</span><span class="s1">&#39;提交&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="AdminCommentForm"><a class="viewcode-back" href="../../blog.html#blog.forms.AdminCommentForm">[文档]</a><span class="k">class</span> <span class="nc">AdminCommentForm</span><span class="p">(</span><span class="n">CommentForm</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;管理员评论表单，管理员评论不需要姓名，电子邮箱等字段&quot;&quot;&quot;</span>
+
+    <span class="n">author</span> <span class="o">=</span> <span class="n">HiddenField</span><span class="p">()</span>
+    <span class="n">email</span> <span class="o">=</span> <span class="n">HiddenField</span><span class="p">()</span>
+    <span class="n">site</span> <span class="o">=</span> <span class="n">HiddenField</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="RegisterForm"><a class="viewcode-back" href="../../blog.html#blog.forms.RegisterForm">[文档]</a><span class="k">class</span> <span class="nc">RegisterForm</span><span class="p">(</span><span class="n">FlaskForm</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;注册表单&quot;&quot;&quot;</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">StringField</span><span class="p">(</span><span class="s1">&#39;姓名&#39;</span><span class="p">,</span> <span class="n">validators</span><span class="o">=</span><span class="p">[</span><span class="n">DataRequired</span><span class="p">(),</span> <span class="n">Length</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">30</span><span class="p">)])</span>
+    <span class="n">username</span> <span class="o">=</span> <span class="n">StringField</span><span class="p">(</span><span class="s1">&#39;用户名&#39;</span><span class="p">,</span> <span class="n">validators</span><span class="o">=</span><span class="p">[</span><span class="n">DataRequired</span><span class="p">(),</span> <span class="n">Length</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">20</span><span class="p">)])</span>
+    <span class="n">password</span> <span class="o">=</span> <span class="n">PasswordField</span><span class="p">(</span><span class="s1">&#39;密码&#39;</span><span class="p">,</span> <span class="n">validators</span><span class="o">=</span><span class="p">[</span><span class="n">DataRequired</span><span class="p">(),</span> <span class="n">EqualTo</span><span class="p">(</span><span class="s1">&#39;password2&#39;</span><span class="p">),</span>
+                                               <span class="n">Length</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">128</span><span class="p">)])</span>
+    <span class="n">password2</span> <span class="o">=</span> <span class="n">PasswordField</span><span class="p">(</span><span class="s1">&#39;确认密码&#39;</span><span class="p">,</span> <span class="n">validators</span><span class="o">=</span><span class="p">[</span><span class="n">DataRequired</span><span class="p">()])</span>
+    <span class="n">email</span> <span class="o">=</span> <span class="n">StringField</span><span class="p">(</span><span class="s1">&#39;邮箱&#39;</span><span class="p">,</span> <span class="n">validators</span><span class="o">=</span><span class="p">[</span><span class="n">Email</span><span class="p">(),</span> <span class="n">DataRequired</span><span class="p">()])</span>
+    <span class="n">blog_title</span> <span class="o">=</span> <span class="n">StringField</span><span class="p">(</span><span class="s1">&#39;博客标题&#39;</span><span class="p">,</span> <span class="n">validators</span><span class="o">=</span><span class="p">[</span><span class="n">DataRequired</span><span class="p">(),</span> <span class="n">Length</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">30</span><span class="p">)])</span>
+    <span class="n">blog_sub_title</span> <span class="o">=</span> <span class="n">StringField</span><span class="p">(</span><span class="s1">&#39;博客副标题&#39;</span><span class="p">,</span> <span class="n">validators</span><span class="o">=</span><span class="p">[</span><span class="n">DataRequired</span><span class="p">(),</span> <span class="n">Length</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">40</span><span class="p">)])</span>
+    <span class="n">about</span> <span class="o">=</span> <span class="n">StringField</span><span class="p">(</span><span class="s1">&#39;关于&#39;</span><span class="p">,</span> <span class="n">validators</span><span class="o">=</span><span class="p">[</span><span class="n">Optional</span><span class="p">()])</span>
+    <span class="n">submit</span> <span class="o">=</span> <span class="n">SubmitField</span><span class="p">(</span><span class="s1">&#39;提交&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="RegisterForm.validate_username"><a class="viewcode-back" href="../../blog.html#blog.forms.RegisterForm.validate_username">[文档]</a>    <span class="k">def</span> <span class="nf">validate_username</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;验证用户名&quot;&quot;&quot;</span>
+        <span class="n">user</span> <span class="o">=</span> <span class="n">Admin</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="n">field</span><span class="o">.</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">user</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span><span class="s1">&#39;该用户名已经存在，请重新输入&#39;</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="PostForm"><a class="viewcode-back" href="../../blog.html#blog.forms.PostForm">[文档]</a><span class="k">class</span> <span class="nc">PostForm</span><span class="p">(</span><span class="n">FlaskForm</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        撰写文章的表单</span>
+
+<span class="sd">        下拉列表字段通过SelectField类来表示一个select标签，</span>
+<span class="sd">        下拉列表的选项通过参数choices指定，choices参数必须是一个包含两个元素的元祖列表</span>
+<span class="sd">        列表中的元素分别包含选项值和选项标签</span>
+
+<span class="sd">        使用coerce关键字指定数据类型，默认是字符串</span>
+<span class="sd">        default参数设置默认的选项值</span>
+
+<span class="sd">        在构造方法__init__方法中指定choices和在实例化的时候指定choices参数的效果是一样的</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">title</span> <span class="o">=</span> <span class="n">StringField</span><span class="p">(</span><span class="s1">&#39;标题&#39;</span><span class="p">,</span> <span class="n">validators</span><span class="o">=</span><span class="p">[</span><span class="n">DataRequired</span><span class="p">(),</span> <span class="n">Length</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">60</span><span class="p">)])</span>
+    <span class="n">category</span> <span class="o">=</span> <span class="n">SelectField</span><span class="p">(</span><span class="s1">&#39;分类&#39;</span><span class="p">,</span> <span class="n">coerce</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">body</span> <span class="o">=</span> <span class="n">CKEditorField</span><span class="p">(</span><span class="s1">&#39;正文&#39;</span><span class="p">,</span> <span class="n">validators</span><span class="o">=</span><span class="p">[</span><span class="n">DataRequired</span><span class="p">()])</span>
+    <span class="n">submit</span> <span class="o">=</span> <span class="n">SubmitField</span><span class="p">(</span><span class="s1">&#39;提交&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">PostForm</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># 调用父类的初始化方法</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">category</span><span class="o">.</span><span class="n">choices</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span><span class="n">category</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">category</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">category</span> <span class="ow">in</span> <span class="n">Category</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="n">Category</span><span class="o">.</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+        <span class="p">]</span>  <span class="c1"># 指定下拉内容</span></div>
+
+
+<div class="viewcode-block" id="CategoryForm"><a class="viewcode-back" href="../../blog.html#blog.forms.CategoryForm">[文档]</a><span class="k">class</span> <span class="nc">CategoryForm</span><span class="p">(</span><span class="n">FlaskForm</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;编辑分类的表单&quot;&quot;&quot;</span>
+
+    <span class="n">name</span> <span class="o">=</span> <span class="n">StringField</span><span class="p">(</span><span class="s1">&#39;分类名称&#39;</span><span class="p">,</span> <span class="n">validators</span><span class="o">=</span><span class="p">[</span><span class="n">DataRequired</span><span class="p">(),</span> <span class="n">Length</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">35</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="s1">&#39;输入的分类名称为1～35个字符&#39;</span><span class="p">)])</span>
+    <span class="n">submit</span> <span class="o">=</span> <span class="n">SubmitField</span><span class="p">(</span><span class="s1">&#39;提交&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="CategoryForm.validate_name"><a class="viewcode-back" href="../../blog.html#blog.forms.CategoryForm.validate_name">[文档]</a>    <span class="k">def</span> <span class="nf">validate_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;验证分类名称是否已经存在&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">Category</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">Category</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">field</span><span class="o">.</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span><span class="n">message</span><span class="o">=</span><span class="s1">&#39;分类名称已经存在&#39;</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="LinkForm"><a class="viewcode-back" href="../../blog.html#blog.forms.LinkForm">[文档]</a><span class="k">class</span> <span class="nc">LinkForm</span><span class="p">(</span><span class="n">FlaskForm</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;链接编辑表单&quot;&quot;&quot;</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">StringField</span><span class="p">(</span><span class="s1">&#39;名称&#39;</span><span class="p">,</span> <span class="n">validators</span><span class="o">=</span><span class="p">[</span><span class="n">DataRequired</span><span class="p">(),</span> <span class="n">Length</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">30</span><span class="p">)])</span>  <span class="c1"># 下拉选项</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="n">StringField</span><span class="p">(</span><span class="s1">&#39;链接&#39;</span><span class="p">,</span> <span class="n">validators</span><span class="o">=</span><span class="p">[</span><span class="n">DataRequired</span><span class="p">(),</span> <span class="n">URL</span><span class="p">(),</span> <span class="n">Length</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">255</span><span class="p">)])</span>
+    <span class="n">submit</span> <span class="o">=</span> <span class="n">SubmitField</span><span class="p">(</span><span class="s1">&#39;提交&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="UploadForm"><a class="viewcode-back" href="../../blog.html#blog.forms.UploadForm">[文档]</a><span class="k">class</span> <span class="nc">UploadForm</span><span class="p">(</span><span class="n">FlaskForm</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;上传头像的表单&quot;&quot;&quot;</span>
+
+    <span class="n">image</span> <span class="o">=</span> <span class="n">FileField</span><span class="p">(</span><span class="s1">&#39;上传(&lt;=3M)&#39;</span><span class="p">,</span> <span class="n">validators</span><span class="o">=</span><span class="p">[</span>
+        <span class="n">FileRequired</span><span class="p">(),</span>
+        <span class="n">FileAllowed</span><span class="p">([</span><span class="s1">&#39;jpeg&#39;</span><span class="p">,</span> <span class="s1">&#39;jpg&#39;</span><span class="p">,</span> <span class="s1">&#39;png&#39;</span><span class="p">],</span> <span class="s1">&#39;上传的文件类型必须是.jpeg 或者 .png 或者 .jpg&#39;</span><span class="p">)</span>
+    <span class="p">])</span>
+    <span class="n">submit</span> <span class="o">=</span> <span class="n">SubmitField</span><span class="p">(</span><span class="s1">&#39;上传&#39;</span><span class="p">)</span></div>
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">blog</a></h1>
+
+
+
+
+
+
+
+
+<h3>导航</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">blog</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">模块代码</a><ul>
+  <li><a href="../blog.html">blog</a><ul>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">快速搜索</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="转向" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, wangdong.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
