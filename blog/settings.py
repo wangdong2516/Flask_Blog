@@ -48,7 +48,7 @@ class BaseConfig(object):
 class DevelopmentConfig(BaseConfig):
     """开发环境配置"""
 
-    SQLALCHEMY_DATABASE_URI = 'mysql://root:root@127.0.0.1:3316/flask'
+    SQLALCHEMY_DATABASE_URI = 'mysql://root:1277431229@localhost/flask'
 
 
 class TestingConfig(BaseConfig):

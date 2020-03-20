@@ -1,0 +1,229 @@
+2020/03/19 11:26:14 [crit] 24306#24306: accept4() failed (24: Too many open files)
+2020/03/19 11:26:15 [crit] 24306#24306: accept4() failed (24: Too many open files)
+2020/03/19 11:26:15 [crit] 24306#24306: accept4() failed (24: Too many open files)
+2020/03/19 11:26:16 [crit] 24306#24306: accept4() failed (24: Too many open files)
+2020/03/19 11:26:16 [crit] 24306#24306: accept4() failed (24: Too many open files)
+2020/03/19 11:26:17 [crit] 24306#24306: accept4() failed (24: Too many open files)
+2020/03/19 11:26:17 [crit] 24306#24306: accept4() failed (24: Too many open files)
+2020/03/19 11:26:18 [crit] 24306#24306: accept4() failed (24: Too many open files)
+2020/03/19 11:26:18 [alert] 24306#24306: *2020 socket() failed (24: Too many open files) while connecting to upstream, client: 127.0.0.1, server: 123.56.102.64, request: "GET / HTTP/1.0", upstream: "http://127.0.0.1:5000/", host: "123.56.102.64"
+2020/03/19 11:26:19 [alert] 24306#24306: *3026 socket() failed (24: Too many open files) while connecting to upstream, client: 127.0.0.1, server: 123.56.102.64, request: "GET /favicon.ico HTTP/1.0", upstream: "http://127.0.0.1:5000/favicon.ico", host: "123.56.102.64", referrer: "http://123.56.102.64:5000/"
+2020/03/19 11:29:50 [crit] 24306#24306: accept4() failed (24: Too many open files)
+2020/03/19 11:29:51 [crit] 24306#24306: accept4() failed (24: Too many open files)
+2020/03/19 11:29:51 [crit] 24306#24306: accept4() failed (24: Too many open files)
+2020/03/19 11:29:52 [crit] 24306#24306: accept4() failed (24: Too many open files)
+2020/03/19 11:29:52 [crit] 24306#24306: accept4() failed (24: Too many open files)
+2020/03/19 11:29:53 [crit] 24306#24306: accept4() failed (24: Too many open files)
+2020/03/19 11:29:53 [crit] 24306#24306: accept4() failed (24: Too many open files)
+2020/03/19 11:29:54 [crit] 24306#24306: accept4() failed (24: Too many open files)
+2020/03/19 11:29:54 [crit] 24306#24306: accept4() failed (24: Too many open files)
+2020/03/19 11:29:55 [crit] 24306#24306: accept4() failed (24: Too many open files)
+2020/03/19 11:29:55 [crit] 24306#24306: accept4() failed (24: Too many open files)
+2020/03/19 11:29:56 [crit] 24306#24306: accept4() failed (24: Too many open files)
+2020/03/19 11:29:56 [crit] 24306#24306: accept4() failed (24: Too many open files)
+2020/03/19 11:29:57 [crit] 24306#24306: accept4() failed (24: Too many open files)
+2020/03/19 11:29:57 [crit] 24306#24306: accept4() failed (24: Too many open files)
+2020/03/19 11:29:58 [crit] 24306#24306: accept4() failed (24: Too many open files)
+2020/03/19 11:29:58 [crit] 24306#24306: accept4() failed (24: Too many open files)
+2020/03/19 11:29:59 [crit] 24306#24306: accept4() failed (24: Too many open files)
+2020/03/19 11:29:59 [crit] 24306#24306: accept4() failed (24: Too many open files)
+2020/03/19 11:30:00 [crit] 24306#24306: accept4() failed (24: Too many open files)
+2020/03/19 11:30:00 [crit] 24306#24306: accept4() failed (24: Too many open files)
+2020/03/19 11:30:01 [crit] 24306#24306: accept4() failed (24: Too many open files)
+2020/03/19 11:30:01 [crit] 24306#24306: accept4() failed (24: Too many open files)
+2020/03/19 11:30:02 [crit] 24306#24306: accept4() failed (24: Too many open files)
+2020/03/19 11:30:02 [crit] 24306#24306: accept4() failed (24: Too many open files)
+2020/03/19 11:30:03 [crit] 24306#24306: accept4() failed (24: Too many open files)
+2020/03/19 11:30:03 [crit] 24306#24306: accept4() failed (24: Too many open files)
+2020/03/19 11:30:04 [crit] 24306#24306: accept4() failed (24: Too many open files)
+2020/03/19 11:38:57 [alert] 1159#1159: *1014 socket() failed (24: Too many open files) while connecting to upstream, client: 127.0.0.1, server: 123.56.102.64, request: "GET / HTTP/1.0", upstream: "http://127.0.0.1:5000/", host: "123.56.102.64"
+2020/03/19 11:38:58 [alert] 1159#1159: *2020 socket() failed (24: Too many open files) while connecting to upstream, client: 127.0.0.1, server: 123.56.102.64, request: "GET /favicon.ico HTTP/1.0", upstream: "http://127.0.0.1:5000/favicon.ico", host: "123.56.102.64", referrer: "http://123.56.102.64:5000/"
+2020/03/19 11:43:05 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:05 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:06 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:06 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:07 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:07 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:08 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:08 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:09 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:09 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:10 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:10 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:11 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:11 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:12 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:12 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:13 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:13 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:14 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:14 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:15 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:15 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:16 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:16 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:17 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:17 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:18 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:18 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:19 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:19 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:20 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:20 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:21 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:21 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:22 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:22 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:23 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:23 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:24 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:24 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:25 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:25 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:26 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:26 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:27 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:27 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:28 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:28 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:29 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:29 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:30 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:30 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:31 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:31 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:32 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:32 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:33 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:33 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:34 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:34 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:35 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:35 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:36 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:36 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:37 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:37 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:38 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:38 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:39 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:39 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:40 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:40 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:41 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:41 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:42 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:42 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:43 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:43 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:44 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:44 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:45 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:45 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:46 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:46 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:47 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:47 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:48 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:48 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:49 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:49 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:50 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:50 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:51 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:51 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:52 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:52 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:53 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:53 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:54 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:54 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:55 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:55 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:56 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:56 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:57 [crit] 1159#1159: accept4() failed (24: Too many open files)
+2020/03/19 11:43:57 [alert] 1159#1159: *3036 socket() failed (24: Too many open files) while connecting to upstream, client: 127.0.0.1, server: 123.56.102.64, request: "GET / HTTP/1.0", upstream: "http://127.0.0.1:5000/", host: "123.56.102.64"
+2020/03/19 11:43:58 [alert] 1159#1159: *4044 socket() failed (24: Too many open files) while connecting to upstream, client: 127.0.0.1, server: 123.56.102.64, request: "GET /favicon.ico HTTP/1.0", upstream: "http://127.0.0.1:5000/favicon.ico", host: "123.56.102.64", referrer: "http://123.56.102.64:5000/"
+2020/03/19 12:51:02 [crit] 2817#2817: accept4() failed (24: Too many open files)
+2020/03/19 12:51:02 [crit] 2817#2817: accept4() failed (24: Too many open files)
+2020/03/19 12:51:03 [crit] 2817#2817: accept4() failed (24: Too many open files)
+2020/03/19 12:51:03 [crit] 2817#2817: accept4() failed (24: Too many open files)
+2020/03/19 12:51:04 [crit] 2817#2817: accept4() failed (24: Too many open files)
+2020/03/19 12:51:04 [crit] 2817#2817: accept4() failed (24: Too many open files)
+2020/03/19 12:51:05 [crit] 2817#2817: accept4() failed (24: Too many open files)
+2020/03/19 12:51:05 [crit] 2817#2817: accept4() failed (24: Too many open files)
+2020/03/19 12:51:06 [crit] 2817#2817: accept4() failed (24: Too many open files)
+2020/03/19 12:51:06 [alert] 2817#2817: *2020 socket() failed (24: Too many open files) while connecting to upstream, client: 127.0.0.1, server: 123.56.102.64, request: "GET / HTTP/1.0", upstream: "http://127.0.0.1:5000/", host: "123.56.102.64"
+2020/03/19 12:51:07 [alert] 2817#2817: *3028 socket() failed (24: Too many open files) while connecting to upstream, client: 127.0.0.1, server: 123.56.102.64, request: "GET /favicon.ico HTTP/1.0", upstream: "http://127.0.0.1:5000/favicon.ico", host: "123.56.102.64", referrer: "http://123.56.102.64:5000/"
+2020/03/19 12:58:13 [alert] 3012#3012: *1022 1024 worker_connections are not enough while connecting to upstream, client: 127.0.0.1, server: 123.56.102.64, request: "GET / HTTP/1.0", upstream: "http://127.0.0.1:5000/", host: "123.56.102.64"
+2020/03/19 12:58:14 [alert] 3012#3012: *2043 1024 worker_connections are not enough while connecting to upstream, client: 127.0.0.1, server: 123.56.102.64, request: "GET /favicon.ico HTTP/1.0", upstream: "http://127.0.0.1:5000/favicon.ico", host: "123.56.102.64", referrer: "http://123.56.102.64:5000/"
+2020/03/19 12:58:58 [alert] 3012#3012: *3064 1024 worker_connections are not enough while connecting to upstream, client: 127.0.0.1, server: 123.56.102.64, request: "GET / HTTP/1.0", upstream: "http://127.0.0.1:5000/", host: "123.56.102.64"
+2020/03/19 12:58:58 [alert] 3012#3012: *4084 1024 worker_connections are not enough while connecting to upstream, client: 127.0.0.1, server: 123.56.102.64, request: "GET /favicon.ico HTTP/1.0", upstream: "http://127.0.0.1:5000/favicon.ico", host: "123.56.102.64", referrer: "http://123.56.102.64:5000/"
+2020/03/19 17:36:17 [error] 6007#6007: *3 upstream prematurely closed connection while reading response header from upstream, client: 1.119.145.46, server: 123.56.102.64, request: "GET / HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001"
+2020/03/19 17:36:18 [error] 6007#6007: *3 upstream prematurely closed connection while reading response header from upstream, client: 1.119.145.46, server: 123.56.102.64, request: "GET /favicon.ico HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001", referrer: "http://123.56.102.64:5001/"
+2020/03/19 17:41:10 [error] 6007#6007: *8 upstream prematurely closed connection while reading response header from upstream, client: 1.119.145.46, server: 123.56.102.64, request: "GET / HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001"
+2020/03/19 17:41:11 [error] 6007#6007: *8 upstream prematurely closed connection while reading response header from upstream, client: 1.119.145.46, server: 123.56.102.64, request: "GET /favicon.ico HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001", referrer: "http://123.56.102.64:5001/"
+2020/03/19 17:41:12 [error] 6007#6007: *8 upstream prematurely closed connection while reading response header from upstream, client: 1.119.145.46, server: 123.56.102.64, request: "GET / HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001"
+2020/03/19 17:41:13 [error] 6007#6007: *8 upstream prematurely closed connection while reading response header from upstream, client: 1.119.145.46, server: 123.56.102.64, request: "GET /favicon.ico HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001", referrer: "http://123.56.102.64:5001/"
+2020/03/19 17:41:14 [error] 6007#6007: *8 upstream prematurely closed connection while reading response header from upstream, client: 1.119.145.46, server: 123.56.102.64, request: "GET / HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001"
+2020/03/19 17:41:15 [error] 6007#6007: *8 upstream prematurely closed connection while reading response header from upstream, client: 1.119.145.46, server: 123.56.102.64, request: "GET /favicon.ico HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001", referrer: "http://123.56.102.64:5001/"
+2020/03/19 17:41:16 [error] 6007#6007: *8 upstream prematurely closed connection while reading response header from upstream, client: 1.119.145.46, server: 123.56.102.64, request: "GET / HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001"
+2020/03/19 17:41:17 [error] 6007#6007: *8 upstream prematurely closed connection while reading response header from upstream, client: 1.119.145.46, server: 123.56.102.64, request: "GET /favicon.ico HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001", referrer: "http://123.56.102.64:5001/"
+2020/03/19 17:41:47 [error] 6007#6007: *8 upstream prematurely closed connection while reading response header from upstream, client: 1.119.145.46, server: 123.56.102.64, request: "GET / HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001"
+2020/03/19 17:41:48 [error] 6007#6007: *8 upstream prematurely closed connection while reading response header from upstream, client: 1.119.145.46, server: 123.56.102.64, request: "GET /favicon.ico HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001", referrer: "http://123.56.102.64:5001/"
+2020/03/19 17:41:48 [error] 6007#6007: *8 upstream prematurely closed connection while reading response header from upstream, client: 1.119.145.46, server: 123.56.102.64, request: "GET / HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001"
+2020/03/19 17:41:48 [error] 6007#6007: *8 upstream prematurely closed connection while reading response header from upstream, client: 1.119.145.46, server: 123.56.102.64, request: "GET /favicon.ico HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001", referrer: "http://123.56.102.64:5001/"
+2020/03/19 17:41:49 [error] 6007#6007: *8 upstream prematurely closed connection while reading response header from upstream, client: 1.119.145.46, server: 123.56.102.64, request: "GET / HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001"
+2020/03/19 17:41:49 [error] 6007#6007: *8 upstream prematurely closed connection while reading response header from upstream, client: 1.119.145.46, server: 123.56.102.64, request: "GET /favicon.ico HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001", referrer: "http://123.56.102.64:5001/"
+2020/03/19 17:41:49 [error] 6007#6007: *8 upstream prematurely closed connection while reading response header from upstream, client: 1.119.145.46, server: 123.56.102.64, request: "GET / HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001"
+2020/03/19 17:41:50 [error] 6007#6007: *8 upstream prematurely closed connection while reading response header from upstream, client: 1.119.145.46, server: 123.56.102.64, request: "GET /favicon.ico HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001", referrer: "http://123.56.102.64:5001/"
+2020/03/19 17:41:50 [error] 6007#6007: *8 upstream prematurely closed connection while reading response header from upstream, client: 1.119.145.46, server: 123.56.102.64, request: "GET / HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001"
+2020/03/19 17:41:50 [error] 6007#6007: *8 upstream prematurely closed connection while reading response header from upstream, client: 1.119.145.46, server: 123.56.102.64, request: "GET /favicon.ico HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001", referrer: "http://123.56.102.64:5001/"
+2020/03/19 17:41:50 [error] 6007#6007: *18 upstream prematurely closed connection while reading response header from upstream, client: 1.119.145.46, server: 123.56.102.64, request: "GET / HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001"
+2020/03/19 17:41:50 [error] 6007#6007: *18 upstream prematurely closed connection while reading response header from upstream, client: 1.119.145.46, server: 123.56.102.64, request: "GET /favicon.ico HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001", referrer: "http://123.56.102.64:5001/"
+2020/03/19 17:41:50 [error] 6007#6007: *8 upstream prematurely closed connection while reading response header from upstream, client: 1.119.145.46, server: 123.56.102.64, request: "GET / HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001"
+2020/03/19 17:41:50 [error] 6007#6007: *8 upstream prematurely closed connection while reading response header from upstream, client: 1.119.145.46, server: 123.56.102.64, request: "GET /favicon.ico HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001", referrer: "http://123.56.102.64:5001/"
+2020/03/19 17:41:51 [error] 6007#6007: *8 upstream prematurely closed connection while reading response header from upstream, client: 1.119.145.46, server: 123.56.102.64, request: "GET / HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001"
+2020/03/19 17:41:51 [error] 6007#6007: *8 upstream prematurely closed connection while reading response header from upstream, client: 1.119.145.46, server: 123.56.102.64, request: "GET /favicon.ico HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001", referrer: "http://123.56.102.64:5001/"
+2020/03/19 17:41:51 [error] 6007#6007: *8 upstream prematurely closed connection while reading response header from upstream, client: 1.119.145.46, server: 123.56.102.64, request: "GET / HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001"
+2020/03/19 17:41:51 [error] 6007#6007: *8 upstream prematurely closed connection while reading response header from upstream, client: 1.119.145.46, server: 123.56.102.64, request: "GET /favicon.ico HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001", referrer: "http://123.56.102.64:5001/"
+2020/03/19 17:41:51 [error] 6007#6007: *18 upstream prematurely closed connection while reading response header from upstream, client: 1.119.145.46, server: 123.56.102.64, request: "GET / HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001"
+2020/03/19 17:41:52 [error] 6007#6007: *18 upstream prematurely closed connection while reading response header from upstream, client: 1.119.145.46, server: 123.56.102.64, request: "GET /favicon.ico HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001", referrer: "http://123.56.102.64:5001/"
+2020/03/19 17:42:50 [error] 6007#6007: *18 connect() failed (111: Connection refused) while connecting to upstream, client: 1.119.145.46, server: 123.56.102.64, request: "GET / HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001"
+2020/03/19 17:42:50 [error] 6007#6007: *18 connect() failed (111: Connection refused) while connecting to upstream, client: 1.119.145.46, server: 123.56.102.64, request: "GET /favicon.ico HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001", referrer: "http://123.56.102.64:5001/"
+2020/03/19 17:42:51 [error] 6007#6007: *18 connect() failed (111: Connection refused) while connecting to upstream, client: 1.119.145.46, server: 123.56.102.64, request: "GET / HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001"
+2020/03/19 17:42:51 [error] 6007#6007: *18 connect() failed (111: Connection refused) while connecting to upstream, client: 1.119.145.46, server: 123.56.102.64, request: "GET /favicon.ico HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001", referrer: "http://123.56.102.64:5001/"
+2020/03/19 19:19:55 [error] 6007#6007: *50 connect() failed (111: Connection refused) while connecting to upstream, client: 1.119.145.46, server: 123.56.102.64, request: "GET / HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001"
+2020/03/19 19:19:55 [error] 6007#6007: *50 connect() failed (111: Connection refused) while connecting to upstream, client: 1.119.145.46, server: 123.56.102.64, request: "GET /favicon.ico HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001", referrer: "http://123.56.102.64:5001/"
+2020/03/19 20:36:51 [error] 6007#6007: *58 connect() failed (111: Connection refused) while connecting to upstream, client: 47.98.103.174, server: 123.56.102.64, request: "GET / HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001"
+2020/03/19 20:36:51 [error] 6007#6007: *60 connect() failed (111: Connection refused) while connecting to upstream, client: 47.98.103.174, server: 123.56.102.64, request: "GET / HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001"
+2020/03/19 20:36:52 [error] 6007#6007: *62 connect() failed (111: Connection refused) while connecting to upstream, client: 47.98.103.174, server: 123.56.102.64, request: "GET / HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001"
+2020/03/19 20:45:40 [error] 6007#6007: *65 connect() failed (111: Connection refused) while connecting to upstream, client: 111.194.45.31, server: 123.56.102.64, request: "GET / HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001"
+2020/03/19 20:45:40 [error] 6007#6007: *65 connect() failed (111: Connection refused) while connecting to upstream, client: 111.194.45.31, server: 123.56.102.64, request: "GET /favicon.ico HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001", referrer: "http://123.56.102.64:5001/"
+2020/03/19 20:49:08 [error] 6007#6007: *75 connect() failed (111: Connection refused) while connecting to upstream, client: 111.194.45.31, server: 123.56.102.64, request: "GET / HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001"
+2020/03/19 20:49:09 [error] 6007#6007: *75 connect() failed (111: Connection refused) while connecting to upstream, client: 111.194.45.31, server: 123.56.102.64, request: "GET /favicon.ico HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001", referrer: "http://123.56.102.64:5001/"
+2020/03/19 21:54:45 [error] 8025#8025: *3 upstream prematurely closed connection while reading response header from upstream, client: 111.194.45.31, server: 123.56.102.64, request: "GET / HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001"
+2020/03/19 21:54:46 [error] 8025#8025: *3 upstream prematurely closed connection while reading response header from upstream, client: 111.194.45.31, server: 123.56.102.64, request: "GET /favicon.ico HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001", referrer: "http://123.56.102.64:5001/"
+2020/03/19 21:57:53 [error] 8025#8025: *7 upstream prematurely closed connection while reading response header from upstream, client: 111.194.45.31, server: 123.56.102.64, request: "GET / HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001"
+2020/03/19 21:57:53 [error] 8025#8025: *7 upstream prematurely closed connection while reading response header from upstream, client: 111.194.45.31, server: 123.56.102.64, request: "GET /favicon.ico HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001", referrer: "http://123.56.102.64:5001/"
+2020/03/19 22:09:41 [error] 9007#9007: *1 upstream prematurely closed connection while reading response header from upstream, client: 111.194.45.31, server: 123.56.102.64, request: "GET / HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001"
+2020/03/19 22:09:42 [error] 9007#9007: *1 upstream prematurely closed connection while reading response header from upstream, client: 111.194.45.31, server: 123.56.102.64, request: "GET /favicon.ico HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001", referrer: "http://123.56.102.64:5001/"
+2020/03/19 22:09:43 [error] 9007#9007: *1 upstream prematurely closed connection while reading response header from upstream, client: 111.194.45.31, server: 123.56.102.64, request: "GET / HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001"
+2020/03/19 22:09:43 [error] 9007#9007: *1 upstream prematurely closed connection while reading response header from upstream, client: 111.194.45.31, server: 123.56.102.64, request: "GET /favicon.ico HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001", referrer: "http://123.56.102.64:5001/"
+2020/03/19 22:10:52 [error] 9007#9007: *7 upstream prematurely closed connection while reading response header from upstream, client: 111.194.45.31, server: 123.56.102.64, request: "GET / HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001"
+2020/03/19 22:10:52 [error] 9007#9007: *7 upstream prematurely closed connection while reading response header from upstream, client: 111.194.45.31, server: 123.56.102.64, request: "GET /favicon.ico HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001", referrer: "http://123.56.102.64:5001/"
+2020/03/19 22:12:07 [error] 9007#9007: *11 upstream prematurely closed connection while reading response header from upstream, client: 111.194.45.31, server: 123.56.102.64, request: "GET / HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001"
+2020/03/19 22:12:07 [error] 9007#9007: *11 upstream prematurely closed connection while reading response header from upstream, client: 111.194.45.31, server: 123.56.102.64, request: "GET /favicon.ico HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001", referrer: "http://123.56.102.64:5001/"
+2020/03/19 22:38:15 [error] 9925#9925: *1 upstream prematurely closed connection while reading response header from upstream, client: 111.194.45.31, server: 123.56.102.64, request: "GET / HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001"
+2020/03/19 22:38:15 [error] 9925#9925: *1 upstream prematurely closed connection while reading response header from upstream, client: 111.194.45.31, server: 123.56.102.64, request: "GET /favicon.ico HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001", referrer: "http://123.56.102.64:5001/"
+2020/03/19 22:48:01 [error] 9925#9925: *5 upstream prematurely closed connection while reading response header from upstream, client: 111.194.45.31, server: 123.56.102.64, request: "POST /auth/register?next=%2F%3F HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001", referrer: "http://123.56.102.64:5001/auth/register?next=%2F%3F"
+2020/03/19 22:59:51 [error] 9925#9925: *31 upstream prematurely closed connection while reading response header from upstream, client: 111.194.45.31, server: 123.56.102.64, request: "POST /auth/register?next=%2F%3F HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001", referrer: "http://123.56.102.64:5001/auth/register?next=%2F%3F"
+2020/03/19 23:10:26 [error] 9925#9925: *42 upstream prematurely closed connection while reading response header from upstream, client: 111.194.45.31, server: 123.56.102.64, request: "POST /auth/register?next=%2F%3F HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001", referrer: "http://123.56.102.64:5001/auth/register?next=%2F%3F"
+2020/03/19 23:36:40 [error] 9925#9925: *65 upstream prematurely closed connection while reading response header from upstream, client: 111.194.45.31, server: 123.56.102.64, request: "POST /auth/register?next=%2F%3F HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001", referrer: "http://123.56.102.64:5001/auth/register?next=%2F%3F"
+2020/03/19 23:42:03 [error] 9925#9925: *77 upstream prematurely closed connection while reading response header from upstream, client: 111.194.45.31, server: 123.56.102.64, request: "POST /auth/register?next=%2F%3F HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001", referrer: "http://123.56.102.64:5001/auth/register?next=%2F%3F"
+2020/03/20 00:58:37 [error] 9925#9925: *103 upstream prematurely closed connection while reading response header from upstream, client: 111.194.45.31, server: 123.56.102.64, request: "GET / HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001", referrer: "http://123.56.102.64:5001/auth/login?next=%2F%3F"
+2020/03/20 10:29:32 [error] 9925#9925: *159 upstream prematurely closed connection while reading response header from upstream, client: 1.119.145.46, server: 123.56.102.64, request: "GET / HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001"
+2020/03/20 10:33:26 [error] 9925#9925: *168 upstream prematurely closed connection while reading response header from upstream, client: 1.119.145.46, server: 123.56.102.64, request: "GET / HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001"
+2020/03/20 10:33:27 [error] 9925#9925: *168 upstream prematurely closed connection while reading response header from upstream, client: 1.119.145.46, server: 123.56.102.64, request: "GET / HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001"
+2020/03/20 10:34:00 [error] 9925#9925: *168 upstream prematurely closed connection while reading response header from upstream, client: 1.119.145.46, server: 123.56.102.64, request: "GET / HTTP/1.1", upstream: "uwsgi://127.0.0.1:5000", host: "123.56.102.64:5001"

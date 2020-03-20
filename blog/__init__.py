@@ -306,5 +306,5 @@ def register_blueprints(app):
         默认情况下，端点是视图函数名称，我们也可以使用endpoint参数改变
     """
     app.register_blueprint(blog_bp)
-    app.register_blueprint(admin_bp, url_prefix='/admin')
-    app.register_blueprint(auth_dp, url_prefix='/auth')  # 注册蓝图给程序实例app
+    app.register_blueprint(admin, url_prefix='/admin')
+    app.register_blueprint(auth, url_prefix='/auth')  # 注册蓝图给程序实例app
