@@ -15,12 +15,12 @@ class BaseConfig(object):
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False  # 自动追踪修改
 
-    MAIL_SERVER = os.getenv('MAIL_SERVER')  # 电子邮件服务器
+    MAIL_SERVER = 'smtp.163.com'  # 电子邮件服务器
     MAIL_PORT = 465  # 发信端口
     MAIL_USE_SSL = True  # 是否使用SSL/TLS
     MAIL_USE_TLS = False  # 是否使用STARTTLS  163邮箱不支持
-    MAIL_USERNAME = os.environ.get('MAIL_USERNAME')  # 发信服务器的用户名
-    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')  # 发信服务器的密码
+    MAIL_USERNAME = 'wang10272516@163.com'  # 发信服务器的用户名
+    MAIL_PASSWORD = 'RFQNHBZQYIHRHZOW'  # 发信服务器的密码
     MAIL_DEFAULT_SENDER = ('FlaskBlog Admin', MAIL_USERNAME)  # 默认发件人(用户名， 地址)
 
     BLUELOG_EMAIL = os.getenv('BLUELOG_EMAIL')  # 博客邮件
@@ -48,7 +48,7 @@ class BaseConfig(object):
 class DevelopmentConfig(BaseConfig):
     """开发环境配置"""
 
-    SQLALCHEMY_DATABASE_URI = 'mysql://root:wang1277@localhost/flask'
+    SQLALCHEMY_DATABASE_URI = 'mysql://root:root@127.0.0.1:3316/flask'
 
 
 class TestingConfig(BaseConfig):

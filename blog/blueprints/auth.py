@@ -103,7 +103,7 @@ def register():
         admin.set_password(password)
         commit_data('add', admin)
         token = generate_confirmation_token(user=admin, op=Operations.CONFIRM)  # 生成一个签名
-        send_confirm_email(user=current_user, token=token)  # 发送确认邮件
+        send_confirm_email(user=admin, token=token)  # 发送确认邮件
         flash('电子邮件已经发送，请注意查收！', 'success')
         return redirect(url_for('.login'))
     return render_template('auth/register.html', form=form)
