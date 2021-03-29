@@ -51,7 +51,7 @@ pyasn1==0.4.8
 pycparser==2.19
 pycrypto==2.6.1
 pycryptodomex==3.9.4
-Pygments==2.5.2
+Pygments==2.7.4
 pylint==2.4.4
 pyOpenSSL==19.1.0
 pyparsing==2.4.6
