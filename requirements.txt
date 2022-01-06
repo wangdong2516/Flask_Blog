@@ -8,7 +8,7 @@ Babel==2.8.0
 billiard==3.6.1.0
 blinker==1.4
 Bootstrap-Flask==1.2.0
-celery==4.4.0
+celery==5.2.2
 certifi==2019.9.11
 cffi==1.13.2
 chardet==3.0.4
