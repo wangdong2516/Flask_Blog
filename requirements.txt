@@ -9,7 +9,7 @@ billiard==3.6.1.0
 blinker==1.4
 Bootstrap-Flask==1.2.0
 celery==4.4.0
-certifi==2019.9.11
+certifi==2022.12.7
 cffi==1.13.2
 chardet==3.0.4
 Click==7.0
